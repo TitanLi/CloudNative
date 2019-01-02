@@ -5,3 +5,7 @@
 安裝教學：[Host Networking](https://hackmd.io/s/BJiZ4ZYWE)
 
 範例：[Host-Networking](https://github.com/TitanLi/OpenStack/blob/master/Host-Networking)
+
+## Step 2
+在所有節點安裝OpenStack Packages
+安裝教學：[OpenStack Packages](https://hackmd.io/s/rJNvbN5-V)
