@@ -22,4 +22,4 @@
 ## Step 4 (Message Queue):
 在Controller Node上安裝Message queue來協調服務之間的操作和狀態資訊
 
-安裝教學：[OpenStack-Message-Queue](https://docs.openstack.org/install-guide/)
+安裝教學：[OpenStack-Message-Queue](https://hackmd.io/s/BkVnFs3W4)
