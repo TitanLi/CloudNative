@@ -23,3 +23,8 @@
 在Controller Node上安裝Message queue來協調服務之間的操作和狀態資訊
 
 安裝教學：[OpenStack-Message-Queue](https://hackmd.io/s/BkVnFs3W4)
+
+## Step 5 (Memcached):
+在Controller Node上安裝Memcached，通常使用Memcached來做身分驗證機制服務cache tokens
+
+安裝教學：[OpenStack-Memcached](https://hackmd.io/s/HJ3H1uXzV)
