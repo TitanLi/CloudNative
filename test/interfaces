@@ -10,10 +10,9 @@ auto ens3
 iface ens3 inet manual
 up ip link set dev $IFACE up
 down ip link set dev $IFACE down
+
 # Source interfaces
 # Please check /etc/network/interfaces.d before changing this file
 # as interfaces may have been defined in /etc/network/interfaces.d
 # See LP: #1262951
 source /etc/network/interfaces.d/*.cfg
-
-dns-nameservers 8.8.8.8
