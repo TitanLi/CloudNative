@@ -28,3 +28,10 @@
 在Controller Node上安裝Memcached，通常使用Memcached來做身分驗證機制服務cache tokens
 
 安裝教學：[OpenStack-Memcached](https://hackmd.io/s/HJ3H1uXzV)
+
+## Step 6 (Keystone):
+在Controller Node上安裝Keystone，Keystone提供單一節點整合管理用於管理身份驗證、授權和目錄服務
+
+安裝教學：[OpenStack-Keystone](https://hackmd.io/s/HkdBONtN4)
+
+範例：[OpenStack-Keystone](https://github.com/TitanLi/OpenStack/blob/master/keystone)
