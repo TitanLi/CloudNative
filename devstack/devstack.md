@@ -64,8 +64,6 @@ RABBIT_PASSWORD=$ADMIN_PASSWORD
 SERVICE_PASSWORD=$ADMIN_PASSWORD
 SERVICE_TOKEN=$ADMIN_PASSWORD
 
-#Neutron Services
-ENABLED_SERVICES+=,neutron,q-svc,q-agt,q-dhcp,q-l3,q-meta,q-lbaas
 # 關閉部署時自動建立Demo subnet功能
 NEUTRON_CREATE_INITIAL_NETWORKS=False
 
