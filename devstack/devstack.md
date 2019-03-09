@@ -4,9 +4,8 @@
 ### 1.網路設定(controller node & compute node)
 ```
 $ sudo su
-$ echo dns-nameservers 8.8.8.8 8.8.4.4 >> /etc/network/interfaces
+$ echo nameserver 8.8.8.8 > /etc/resolv.conf
 // $ echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf > /dev/null
-$ echo dns-nameservers 8.8.8.8 >> /etc/hosts
 ```
 
 ### 2.網卡設定(controller node & compute node)
@@ -44,6 +43,13 @@ $ cd devstack
 > PUBLIC_INTERFACE 外部訪問使用
 
 > FLAT_INTERFACE 內部通訊使用
+
+> FLOATING_RANGE
+>> OpenStack雲實例使用的FloatingIP範圍，該範圍必須與host相同網段，假設host IP:10.0.1.97，則FLOATING_RANGE設置為10.0.1.224/27，表示FloatingIP範圍為10.0.1.225~254
+>> ex:FLOATING_RANGE=10.0.1.224/27
+
+> FIXED_RANGE表示OpenStack建立雲實例後，該雲實例內部使用的IP
+>> ex:FIXED_RANGE=10.20.0.0/24
 ```
 [[local|localrc]]
 HOST_IP=10.0.1.97
@@ -58,11 +64,12 @@ RABBIT_PASSWORD=$ADMIN_PASSWORD
 SERVICE_PASSWORD=$ADMIN_PASSWORD
 SERVICE_TOKEN=$ADMIN_PASSWORD
 
+#Neutron Services
+ENABLED_SERVICES+=,neutron,q-svc,q-agt,q-dhcp,q-l3,q-meta,q-lbaas
 # 關閉部署時自動建立Demo subnet功能
 NEUTRON_CREATE_INITIAL_NETWORKS=False
 
 # 禁用etcd
-# disable_service etcd3local.conf 
 # disable_service etcd3
 
 MULTI_HOST=1
