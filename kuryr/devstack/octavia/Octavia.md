@@ -16,3 +16,10 @@
 6. neutron CLI:[https://bugzilla.redhat.com/show_bug.cgi?id=1484106](https://bugzilla.redhat.com/show_bug.cgi?id=1484106)
 
 7. Kuryr Kubernetes與LoadBalancer關係:[https://docs.openstack.org/kuryr-kubernetes/latest/devref/service_support.html](https://docs.openstack.org/kuryr-kubernetes/latest/devref/service_support.html)
+
+---
+## 重點套件
+Octavia github:[https://github.com/openstack/octavia](https://github.com/openstack/octavia)
+
+requirements github:[https://github.com/openstack/requirements](https://github.com/openstack/requirements)
+global-requirements.txt需修改
