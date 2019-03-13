@@ -174,6 +174,7 @@ disable_service etcd3
 ```
 #### 解決方法：
 ```
+$ sudo pip install octavia-lib
 $ vim /opt/stack/requirements/global-requirements.txt
 檢查是否有以下元件
 octavia-lib===1.1.0
