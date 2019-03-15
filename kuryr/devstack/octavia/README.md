@@ -7,8 +7,8 @@
 網路設定
 ```
 $ sudo su
-$ echo "nameserver 8.8.8.8" > /etc/resolv.conf
-// $ echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf > /dev/null
+// $ echo "nameserver 8.8.8.8" > /etc/resolv.conf
+$ echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf > /dev/null
 ```
 網卡設定
 ```
@@ -51,6 +51,10 @@ RABBIT_PASSWORD=$ADMIN_PASSWORD
 SERVICE_PASSWORD=$ADMIN_PASSWORD
 SERVICE_TOKEN=$ADMIN_PASSWORD
 
+# Glance
+enable_service g-api
+enable_service g-reg
+
 # Neutron services
 enable_service neutron
 enable_service q-agt
@@ -67,6 +71,7 @@ enable_service o-api
 enable_service o-cw
 enable_service o-hm
 enable_service o-hk
+enable_service o-da
 
 NEUTRON_CREATE_INITIAL_NETWORKS=False
 
@@ -249,4 +254,19 @@ $ vim /opt/stack/horizon/openstack_dashboard/local/local_settings.py
 
 #重新啟動apache2
 $ sudo service apache2 restart
+```
+### 問題八
+#### 問題
+```
+++::                                        curl -g -k --noproxy '*' -s -o /dev/null -w '%{http_code}' http://10.0.1.97/image
++::                                        [[ 503 == 503 ]]
+
+[ERROR] /opt/stack/devstack/lib/glance:353 g-api did not start
+```
+#### 解決方法
+```
+$ ./unstack.sh
+$ ./clean.sh
+$ killall -u stack
+$ ./stack.sh
 ```
