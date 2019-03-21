@@ -92,7 +92,7 @@ $ kubectl delete clusterrolebinding  titan-binding
 2. 建立一個k8s user(目前使用admin)
 3. 建立pod network ，kuryr建議子網設定是10.1.0.0/16,Gateway:10.1.255.254
 ```
-$ openstack network create --project kuryrk8s pod
+$ openstack network create --project admin pod
 +---------------------------+--------------------------------------+
 | Field                     | Value                                |
 +---------------------------+--------------------------------------+
@@ -125,7 +125,7 @@ $ openstack network create --project kuryrk8s pod
 | updated_at                | 2019-03-15T06:29:37Z                 |
 +---------------------------+--------------------------------------+
 
-$ openstack subnet create --project kuryrk8s --network dec4f114-ac43-42bb-be25-8afb4f01397e --no-dhcp --gateway 10.1.255.254 --subnet-range 10.1.0.0/16 pod_subnet
+$ openstack subnet create --project admin --network pod --no-dhcp --gateway 10.1.255.254 --subnet-range 10.1.0.0/16 pod_subnet
 +-------------------+--------------------------------------+
 | Field             | Value                                |
 +-------------------+--------------------------------------+
@@ -155,7 +155,7 @@ $ openstack subnet create --project kuryrk8s --network dec4f114-ac43-42bb-be25-8
 4. 建立service network ，kuryr建議子網設定是10.2.0.0/16,Gateway:10.2.255.254
                         subnet pool只給10.2.128.1~10.2.255.253，前半留給loadbalancer
 ```
-$ openstack network create --project kuryrk8s services
+$ openstack network create --project admin services
 +---------------------------+--------------------------------------+
 | Field                     | Value                                |
 +---------------------------+--------------------------------------+
@@ -188,7 +188,7 @@ $ openstack network create --project kuryrk8s services
 | updated_at                | 2019-03-15T06:35:43Z                 |
 +---------------------------+--------------------------------------+
 
-$ openstack subnet create --project kuryrk8s --network services --no-dhcp --gateway 10.2.255.254 --ip-version 4 --allocation-pool start=10.2.128.1,end=10.2.255.253 --subnet-range 10.2.0.0/16 services_subnet
+$ openstack subnet create --project admin --network services --no-dhcp --gateway 10.2.255.254 --ip-version 4 --allocation-pool start=10.2.128.1,end=10.2.255.253 --subnet-range 10.2.0.0/16 services_subnet
 +-------------------+--------------------------------------+
 | Field             | Value                                |
 +-------------------+--------------------------------------+
@@ -217,7 +217,7 @@ $ openstack subnet create --project kuryrk8s --network services --no-dhcp --gate
 ```
 5. 建立一個router，把pod subnet和service subnet的Gateway都連起來
 ```
-$ openstack router create --project kuryrk8s kuryr-kubernetes
+$ openstack router create --project admin kuryr-kubernetes
 +-------------------------+--------------------------------------+
 | Field                   | Value                                |
 +-------------------------+--------------------------------------+
@@ -240,7 +240,7 @@ $ openstack router create --project kuryrk8s kuryr-kubernetes
 | updated_at              | 2019-03-15T06:40:28Z                 |
 +-------------------------+--------------------------------------+
 
-$ openstack port create --project kuryrk8s --network dec4f114-ac43-42bb-be25-8afb4f01397e --fixed-ip ip-address=10.1.255.254 pod_subnet_router
+$ openstack port create --project admin --network pod --fixed-ip ip-address=10.1.255.254 pod_subnet_router
 +-----------------------+-----------------------------------------------------------------------------+
 | Field                 | Value                                                                       |
 +-----------------------+-----------------------------------------------------------------------------+
@@ -276,7 +276,7 @@ $ openstack port create --project kuryrk8s --network dec4f114-ac43-42bb-be25-8af
 | updated_at            | 2019-03-15T06:43:02Z                                                        |
 +-----------------------+-----------------------------------------------------------------------------+
 
-$ openstack port create --project kuryrk8s --network services --fixed-ip ip-address=10.2.255.254 service_subnet_router
+$ openstack port create --project admin --network services --fixed-ip ip-address=10.2.255.254 service_subnet_router
 +-----------------------+-----------------------------------------------------------------------------+
 | Field                 | Value                                                                       |
 +-----------------------+-----------------------------------------------------------------------------+
@@ -324,7 +324,7 @@ service_subnet = c3e52567-5202-4396-954b-806ce64094ed
 ```
 6. 建立一個security group，允許來自pod network和service network的所有TCP
 ```
-$ openstack security group create --project kuryrk8s service_pod_access_sg
+$ openstack security group create --project admin service_pod_access_sg
 +-----------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Field           | Value                                                                                                                                                 |
 +-----------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -340,7 +340,7 @@ $ openstack security group create --project kuryrk8s service_pod_access_sg
 | updated_at      | 2019-03-15T06:56:18Z                                                                                                                                  |
 +-----------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-$ openstack security group rule create --project kuryrk8s --remote-ip 10.2.0.0/16 --ethertype IPv4 --protocol tcp service_pod_access_sg
+$ openstack security group rule create --project admin --remote-ip 10.2.0.0/16 --ethertype IPv4 --protocol tcp service_pod_access_sg
 +-------------------+--------------------------------------+
 | Field             | Value                                |
 +-------------------+--------------------------------------+
@@ -364,51 +364,51 @@ $ openstack security group rule create --project kuryrk8s --remote-ip 10.2.0.0/1
 編輯
 [neutron_defaults]
 ovs_bridge = br-int
-pod_security_groups = f0b6f0bd-40f7-4ab6-a77b-3cf9f7cc28ac
+pod_security_groups = 57a4f2cc-028f-4f70-a28a-7d179a0e66b0
 ```
 
 ## 建立loadbalancer
 ```
-$ openstack loadbalancer create --project kuryrk8s --vip-address 10.2.0.1 --vip-subnet-id c3e52567-5202-4396-954b-806ce64094ed --name kuryr/kubernetes
+$ openstack loadbalancer create --project admin --vip-address 10.2.0.1 --vip-subnet-id d33f310d-c40c-443c-9063-87c9a48bbe86 --name default/kubernetes
 +---------------------+--------------------------------------+
 | Field               | Value                                |
 +---------------------+--------------------------------------+
 | admin_state_up      | True                                 |
-| created_at          | 2019-03-15T07:27:27                  |
+| created_at          | 2019-03-20T18:15:35                  |
 | description         |                                      |
 | flavor_id           | None                                 |
-| id                  | 661cc831-c57c-4aa1-9b99-b5c1ab7c78df |
+| id                  | b99bb41f-a312-46a9-882e-fb015a5f2686 |
 | listeners           |                                      |
-| name                | kuryr/kubernetes                     |
+| name                | default/kubernetes                   |
 | operating_status    | OFFLINE                              |
 | pools               |                                      |
-| project_id          | 77622b1a98e14737a4f1563aa0531c1e     |
+| project_id          | 87b84e4bc98d4317a91b03da48a06d45     |
 | provider            | amphora                              |
 | provisioning_status | PENDING_CREATE                       |
 | updated_at          | None                                 |
 | vip_address         | 10.2.0.1                             |
-| vip_network_id      | fe214a02-9bcb-40ea-be84-04d68f93f4d2 |
-| vip_port_id         | a7bb77e5-a1a1-44de-852c-5f0abcfbbfa9 |
+| vip_network_id      | 2d5c54f4-f7b2-4c60-9e3b-f13c971f37ed |
+| vip_port_id         | 15b13c4c-4254-4bb9-979e-519338cab288 |
 | vip_qos_policy_id   | None                                 |
-| vip_subnet_id       | c3e52567-5202-4396-954b-806ce64094ed |
+| vip_subnet_id       | d33f310d-c40c-443c-9063-87c9a48bbe86 |
 +---------------------+--------------------------------------+
 
-$ openstack loadbalancer pool create --name kuryr/kubernetes:HTTPS:443 --protocol HTTPS --lb-algorithm LEAST_CONNECTIONS --loadbalancer 661cc831-c57c-4aa1-9b99-b5c1ab7c78df
+$ openstack loadbalancer pool create --name default/kubernetes:HTTPS:443 --protocol HTTPS --lb-algorithm LEAST_CONNECTIONS --loadbalancer b99bb41f-a312-46a9-882e-fb015a5f2686
 +----------------------+--------------------------------------+
 | Field                | Value                                |
 +----------------------+--------------------------------------+
 | admin_state_up       | True                                 |
-| created_at           | 2019-03-15T07:30:09                  |
+| created_at           | 2019-03-20T18:18:54                  |
 | description          |                                      |
 | healthmonitor_id     |                                      |
-| id                   | 6ee8eaf0-d8a7-46c3-80fa-aa306b8c43b8 |
+| id                   | 347226d2-7538-4fb8-872a-c1fef52ca15e |
 | lb_algorithm         | LEAST_CONNECTIONS                    |
 | listeners            |                                      |
-| loadbalancers        | 661cc831-c57c-4aa1-9b99-b5c1ab7c78df |
+| loadbalancers        | b99bb41f-a312-46a9-882e-fb015a5f2686 |
 | members              |                                      |
-| name                 | kuryr/kubernetes:HTTPS:443           |
+| name                 | default/kubernetes:HTTPS:443         |
 | operating_status     | OFFLINE                              |
-| project_id           | 77622b1a98e14737a4f1563aa0531c1e     |
+| project_id           | 87b84e4bc98d4317a91b03da48a06d45     |
 | protocol             | HTTPS                                |
 | provisioning_status  | PENDING_CREATE                       |
 | session_persistence  | None                                 |
@@ -419,17 +419,17 @@ $ openstack loadbalancer pool create --name kuryr/kubernetes:HTTPS:443 --protoco
 | tls_enabled          | False                                |
 +----------------------+--------------------------------------+
 
-$ openstack loadbalancer member create --name kuryr-k8s-master --address 192.168.1.2 --protocol-port 6443 6ee8eaf0-d8a7-46c3-80fa-aa306b8c43b8
+$ openstack loadbalancer member create --name kuryr-k8s-master --address 192.168.1.2 --protocol-port 6443 347226d2-7538-4fb8-872a-c1fef52ca15e
 +---------------------+--------------------------------------+
 | Field               | Value                                |
 +---------------------+--------------------------------------+
 | address             | 192.168.1.2                          |
 | admin_state_up      | True                                 |
-| created_at          | 2019-03-15T07:32:24                  |
-| id                  | 693ea863-929f-4cb4-bc0a-5f4ac80bc1e6 |
+| created_at          | 2019-03-20T18:19:30                  |
+| id                  | d61e1b22-8fae-4283-90ed-16de62637c4e |
 | name                | kuryr-k8s-master                     |
 | operating_status    | NO_MONITOR                           |
-| project_id          | 77622b1a98e14737a4f1563aa0531c1e     |
+| project_id          | 87b84e4bc98d4317a91b03da48a06d45     |
 | protocol_port       | 6443                                 |
 | provisioning_status | PENDING_CREATE                       |
 | subnet_id           | None                                 |
@@ -440,23 +440,23 @@ $ openstack loadbalancer member create --name kuryr-k8s-master --address 192.168
 | backup              | False                                |
 +---------------------+--------------------------------------+
 
-$ openstack loadbalancer listener create --name kuryr/kubernetes:HTTPS:443 --protocol HTTPS --default-pool 6ee8eaf0-d8a7-46c3-80fa-aa306b8c43b8 --protocol-port 443 661cc831-c57c-4aa1-9b99-b5c1ab7c78df
+$ openstack loadbalancer listener create --name default/kubernetes:HTTPS:443 --protocol HTTPS --default-pool 347226d2-7538-4fb8-872a-c1fef52ca15e --protocol-port 443 b99bb41f-a312-46a9-882e-fb015a5f2686
 +-----------------------------+--------------------------------------+
 | Field                       | Value                                |
 +-----------------------------+--------------------------------------+
 | admin_state_up              | True                                 |
 | connection_limit            | -1                                   |
-| created_at                  | 2019-03-15T07:36:44                  |
-| default_pool_id             | 6ee8eaf0-d8a7-46c3-80fa-aa306b8c43b8 |
+| created_at                  | 2019-03-20T18:21:06                  |
+| default_pool_id             | 347226d2-7538-4fb8-872a-c1fef52ca15e |
 | default_tls_container_ref   | None                                 |
 | description                 |                                      |
-| id                          | a3c01bb5-1464-4206-9cdd-5a8cac56ac8c |
+| id                          | 9be6dc55-d9d2-4d78-b57d-3e99ae496cd7 |
 | insert_headers              | None                                 |
 | l7policies                  |                                      |
-| loadbalancers               | 661cc831-c57c-4aa1-9b99-b5c1ab7c78df |
-| name                        | kuryr/kubernetes:HTTPS:443           |
+| loadbalancers               | b99bb41f-a312-46a9-882e-fb015a5f2686 |
+| name                        | default/kubernetes:HTTPS:443         |
 | operating_status            | OFFLINE                              |
-| project_id                  | 77622b1a98e14737a4f1563aa0531c1e     |
+| project_id                  | 87b84e4bc98d4317a91b03da48a06d45     |
 | protocol                    | HTTPS                                |
 | protocol_port               | 443                                  |
 | provisioning_status         | PENDING_CREATE                       |
@@ -465,12 +465,11 @@ $ openstack loadbalancer listener create --name kuryr/kubernetes:HTTPS:443 --pro
 | timeout_member_connect      | 5000                                 |
 | timeout_member_data         | 50000                                |
 | timeout_tcp_inspect         | 0                                    |
-| updated_at                  | 2019-03-15T07:36:44                  |
+| updated_at                  | 2019-03-20T18:21:06                  |
 | client_ca_tls_container_ref | None                                 |
 | client_authentication       | NONE                                 |
 | client_crl_container_ref    | None                                 |
 +-----------------------------+--------------------------------------+
-```
 
 ## 編輯配置檔/etc/kuryr/kuryr.conf
 ```
@@ -640,4 +639,64 @@ export OS_IDENTITY_API_VERSION=3
 export OS_IMAGE_API_VERSION=2
 儲存
 $ . admin-openrc
+```
+### 問題二:
+#### 問題:
+```
+$ kubectl get pod
+The connection to the server 10.0.1.98:6443 was refused - did you specify the right host or port?
+
+$ systemctl status kubelet
+● kubelet.service - kubelet: The Kubernetes Node Agent
+   Loaded: loaded (/lib/systemd/system/kubelet.service; enabled; vendor preset: enabled)
+  Drop-In: /etc/systemd/system/kubelet.service.d
+           └─10-kubeadm.conf
+   Active: activating (auto-restart) (Result: exit-code) since Wed 2019-03-20 18:41:13 UTC; 9s ago
+     Docs: https://kubernetes.io/docs/home/
+  Process: 22477 ExecStart=/usr/bin/kubelet $KUBELET_KUBECONFIG_ARGS $KUBELET_CONFIG_ARGS $KUBELET_KUBEADM_ARGS $KUBELET_EXTRA_ARG
+ Main PID: 22477 (code=exited, status=255)
+
+Mar 20 18:41:13 titan2 systemd[1]: kubelet.service: Unit entered failed state.
+Mar 20 18:41:13 titan2 systemd[1]: kubelet.service: Failed with result 'exit-code'.
+
+root@titan2:/home/ubuntu# systemctl restart kubelet
+root@titan2:/home/ubuntu# systemctl status kubelet
+● kubelet.service - kubelet: The Kubernetes Node Agent
+   Loaded: loaded (/lib/systemd/system/kubelet.service; enabled; vendor preset: enabled)
+  Drop-In: /etc/systemd/system/kubelet.service.d
+           └─10-kubeadm.conf
+   Active: activating (auto-restart) (Result: exit-code) since Wed 2019-03-20 18:41:43 UTC; 2s ago
+     Docs: https://kubernetes.io/docs/home/
+  Process: 22584 ExecStart=/usr/bin/kubelet $KUBELET_KUBECONFIG_ARGS $KUBELET_CONFIG_ARGS $KUBELET_KUBEADM_ARGS $KUBELET_EXTRA_ARG
+ Main PID: 22584 (code=exited, status=255)
+
+Mar 20 18:41:43 titan2 systemd[1]: kubelet.service: Unit entered failed state.
+Mar 20 18:41:43 titan2 systemd[1]: kubelet.service: Failed with result 'exit-code'.
+```
+#### 解決方法:
+```
+$ sudo swapon -s
+Filename				Type		Size	Used	Priority
+/swap.img                              	file    	4194300	0	-1
+
+$ swapoff -a
+
+$ free
+              total        used        free      shared  buff/cache   available
+Mem:       16179168      773704    14195124       58524     1210340    14995916
+Swap:             0           0           0
+
+$ sudo systemctl status kubelet
+● kubelet.service - kubelet: The Kubernetes Node Agent
+   Loaded: loaded (/lib/systemd/system/kubelet.service; enabled; vendor preset: enabled)
+  Drop-In: /etc/systemd/system/kubelet.service.d
+           └─10-kubeadm.conf
+   Active: active (running) since Wed 2019-03-20 18:43:56 UTC; 57s ago
+     Docs: https://kubernetes.io/docs/home/
+ Main PID: 23044 (kubelet)
+    Tasks: 30
+   Memory: 44.7M
+      CPU: 4.584s
+   CGroup: /system.slice/kubelet.service
+           └─23044 /usr/bin/kubelet --bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kub
 ```
