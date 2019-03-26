@@ -6,6 +6,7 @@ $ sudo apt install -y virtualenv
 $ mkdir kuryr-k8s-controller
 $ cd kuryr-k8s-controller
 $ virtualenv env
+# 建議master
 $ git clone https://git.openstack.org/openstack/kuryr-kubernetes -b stable/rocky
 $ . env/bin/activate
 $ pip install -e kuryr-kubernetes
@@ -25,7 +26,7 @@ api_root = https://10.0.1.98:6443
 ssl_ca_crt_file = /etc/kubernetes/pki/ca.crt
 token_file = /home/ubuntu/token
 [neutron]
-auth_url = http://10.0.1.98:5000/v3
+auth_url = http://10.0.1.98/identity
 username = admin
 user_domain_name = Default
 password = ADMIN_PASS
@@ -322,7 +323,7 @@ ovs_bridge = br-int
 pod_subnet = 3ae27db6-a995-4950-b3e0-059a72a2206f
 service_subnet = c3e52567-5202-4396-954b-806ce64094ed
 ```
-6. 建立一個security group，允許來自pod network和service network的所有TCP
+6. 建立一個security group，允許來自pod network和service network的所有TCP(目前使用default)
 ```
 $ openstack security group create --project admin service_pod_access_sg
 +-----------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -419,7 +420,8 @@ $ openstack loadbalancer pool create --name default/kubernetes:HTTPS:443 --proto
 | tls_enabled          | False                                |
 +----------------------+--------------------------------------+
 
-$ openstack loadbalancer member create --name kuryr-k8s-master --address 192.168.1.2 --protocol-port 6443 347226d2-7538-4fb8-872a-c1fef52ca15e
+#$ openstack loadbalancer member create --name kuryr-k8s-master --address 192.168.1.2 --protocol-port 6443 347226d2-7538-4fb8-872a-c1fef52ca15e
+$ openstack loadbalancer member create --name kuryr-k8s-master --address 192.168.0.2 --protocol-port 6443 347226d2-7538-4fb8-872a-c1fef52ca15e
 +---------------------+--------------------------------------+
 | Field               | Value                                |
 +---------------------+--------------------------------------+
@@ -471,152 +473,117 @@ $ openstack loadbalancer listener create --name default/kubernetes:HTTPS:443 --p
 | client_crl_container_ref    | None                                 |
 +-----------------------------+--------------------------------------+
 
-## 編輯配置檔/etc/kuryr/kuryr.conf
+## 編輯配置檔/etc/kuryr/kuryr.conf(controller node)
 ```
 $ sudo vim /etc/kuryr/kuryr.conf
 [DEFAULT]
 use_stderr = true
 bindir = /opt/stack/kuryr-k8s-controller/env/libexec/kuryr
 [kubernetes]
-api_root = https://10.0.1.98:6443
+api_root = https://10.0.1.97:6443
 ssl_ca_crt_file = /etc/kubernetes/pki/ca.crt
 token_file = /home/ubuntu/token
 [neutron]
-auth_url = http://10.0.1.98/identity
+auth_url = http://10.0.1.97/identity
 username = admin
 user_domain_name = Default
 # password = ADMIN_PASS
 password = password
-project_name = k8s
+project_name = admin
 project_domain_name = Default
 auth_type = password
 [neutron_defaults]
-ovs_bridge = br-int
-pod_security_groups = 5c0ddafd-1c06-4207-adbd-2e72d73cc810
-pod_subnet = 5b03e5b7-d331-41e5-94e5-eee95ca0892b
-project = 37ea8f533f6b4287a4a9bdd73a249404
-service_subnet = 91322fae-b300-486d-8572-e4c8eef5d177
+vs_bridge = br-int
+pod_security_groups = 318cc711-0698-42eb-8008-18753a2d0ffc
+pod_subnet = 6485ffa3-c391-4994-98e5-2f2cda42bed0 
+project = 5780affc22444315af6a424d8c92b9d4
+service_subnet = 42b0e3fd-6f7b-4681-ab35-d29f517964e9
 ```
-
-## loadbalancer create
-
+## 運行kuryr-k8s-controller
 ```
-$ openstack subnet list
-+--------------------------------------+----------------+--------------------------------------+----------------+
-| ID                                   | Name           | Network                              | Subnet         |
-+--------------------------------------+----------------+--------------------------------------+----------------+
-| 1203dae9-f031-4acd-802c-1821b36f9af3 | test           | 38d17d93-f49c-4764-ac03-6b24aba9f33a | 10.0.2.0/24    |
-| 46fbcd7d-13b6-47ec-8098-549c89931b43 | service        | a8cdd457-9f33-4413-aaf3-25786c05c1a6 | 10.2.0.0/16    |
-| 48c7085d-b647-49eb-af95-5b7c3d2b8286 | pod            | 1abcdd6a-3b02-401f-8e95-8fd1c15d665a | 10.1.0.0/16    |
-| b982dba2-1fce-47e0-9863-ea68350bba03 | lb-mgmt-subnet | d713a472-5a7e-483f-b641-2871fba869ce | 192.168.0.0/24 |
-| dc57614a-f9fe-4a27-932c-7b771755f507 | public         | bd9b7d21-23ba-4db9-9b14-bd9ea9c8f9ac | 10.0.1.0/24    |
-+--------------------------------------+----------------+--------------------------------------+----------------+
-
-$ openstack loadbalancer create --vip-address 10.2.0.1 --vip-subnet-id 46fbcd7d-13b6-47ec-8098-549c89931b43 --name default/kubernetes
-+---------------------+--------------------------------------+
-| Field               | Value                                |
-+---------------------+--------------------------------------+
-| admin_state_up      | True                                 |
-| created_at          | 2019-03-14T08:52:20                  |
-| description         |                                      |
-| flavor_id           | None                                 |
-| id                  | c9c1f443-dfb4-4ee2-b76f-6472dc51d242 |
-| listeners           |                                      |
-| name                | default/kubernetes                   |
-| operating_status    | OFFLINE                              |
-| pools               |                                      |
-| project_id          | 456101ea23a04d08bea1f700e0de9020     |
-| provider            | amphora                              |
-| provisioning_status | PENDING_CREATE                       |
-| updated_at          | None                                 |
-| vip_address         | 10.2.0.1                             |
-| vip_network_id      | a8cdd457-9f33-4413-aaf3-25786c05c1a6 |
-| vip_port_id         | 9d50d3a2-b322-4bdf-8501-b20099845a7d |
-| vip_qos_policy_id   | None                                 |
-| vip_subnet_id       | 46fbcd7d-13b6-47ec-8098-549c89931b43 |
-+---------------------+--------------------------------------+
-
-openstack loadbalancer pool create --name default/kubernetes:HTTPS:443 --protocol HTTPS --lb-algorithm LEAST_CONNECTIONS --loadbalancer c9c1f443-dfb4-4ee2-b76f-6472dc51d242
-+----------------------+--------------------------------------+
-| Field                | Value                                |
-+----------------------+--------------------------------------+
-| admin_state_up       | True                                 |
-| created_at           | 2019-03-14T09:03:51                  |
-| description          |                                      |
-| healthmonitor_id     |                                      |
-| id                   | bebb5c98-630d-4438-909d-baba7c189df1 |
-| lb_algorithm         | LEAST_CONNECTIONS                    |
-| listeners            |                                      |
-| loadbalancers        | c9c1f443-dfb4-4ee2-b76f-6472dc51d242 |
-| members              |                                      |
-| name                 | default/kubernetes:HTTPS:443         |
-| operating_status     | OFFLINE                              |
-| project_id           | 456101ea23a04d08bea1f700e0de9020     |
-| protocol             | HTTPS                                |
-| provisioning_status  | PENDING_CREATE                       |
-| session_persistence  | None                                 |
-| updated_at           | None                                 |
-| tls_container_ref    | None                                 |
-| ca_tls_container_ref | None                                 |
-| crl_container_ref    | None                                 |
-| tls_enabled          | False                                |
-+----------------------+--------------------------------------+
-
-$ openstack loadbalancer member create --name k8s-master-0 --address 192.168.1.2 --protocol-port 6443 bebb5c98-630d-4438-909d-baba7c189df1
-+---------------------+--------------------------------------+
-| Field               | Value                                |
-+---------------------+--------------------------------------+
-| address             | 192.168.1.2                          |
-| admin_state_up      | True                                 |
-| created_at          | 2019-03-14T09:06:52                  |
-| id                  | b40d2db2-fc11-4396-8e1e-cc8dee50f442 |
-| name                | k8s-master-0                         |
-| operating_status    | NO_MONITOR                           |
-| project_id          | 456101ea23a04d08bea1f700e0de9020     |
-| protocol_port       | 6443                                 |
-| provisioning_status | PENDING_CREATE                       |
-| subnet_id           | None                                 |
-| updated_at          | None                                 |
-| weight              | 1                                    |
-| monitor_port        | None                                 |
-| monitor_address     | None                                 |
-| backup              | False                                |
-+---------------------+--------------------------------------+
-
-$ openstack loadbalancer listener create --name default/kubernetes:HTTPS:443 --protocol HTTPS --default-pool bebb5c98-630d-4438-909d-baba7c189df1 --protocol-port 443 c9c1f443-dfb4-4ee2-b76f-6472dc51d242
-+-----------------------------+--------------------------------------+
-| Field                       | Value                                |
-+-----------------------------+--------------------------------------+
-| admin_state_up              | True                                 |
-| connection_limit            | -1                                   |
-| created_at                  | 2019-03-14T09:08:25                  |
-| default_pool_id             | bebb5c98-630d-4438-909d-baba7c189df1 |
-| default_tls_container_ref   | None                                 |
-| description                 |                                      |
-| id                          | e8a5fd1d-1b72-41d4-8e5f-03f4470467dc |
-| insert_headers              | None                                 |
-| l7policies                  |                                      |
-| loadbalancers               | c9c1f443-dfb4-4ee2-b76f-6472dc51d242 |
-| name                        | default/kubernetes:HTTPS:443         |
-| operating_status            | OFFLINE                              |
-| project_id                  | 456101ea23a04d08bea1f700e0de9020     |
-| protocol                    | HTTPS                                |
-| protocol_port               | 443                                  |
-| provisioning_status         | PENDING_CREATE                       |
-| sni_container_refs          | []                                   |
-| timeout_client_data         | 50000                                |
-| timeout_member_connect      | 5000                                 |
-| timeout_member_data         | 50000                                |
-| timeout_tcp_inspect         | 0                                    |
-| updated_at                  | 2019-03-14T09:08:25                  |
-| client_ca_tls_container_ref | None                                 |
-| client_authentication       | NONE                                 |
-| client_crl_container_ref    | None                                 |
-+-----------------------------+--------------------------------------+
+$ kuryr-k8s-controller --config-file /etc/kuryr/kuryr.conf -d
 ```
-
-## kuryr-cni
-/opt/stack/kuryr-k8s-controller/env/local/bin
+---
+# kuryr-cni
+> kuryr-cni路徑：/opt/stack/kuryr-k8s-controller/env/local/bin
+## 安裝配置kuryr-CNI在k8s node
+```
+$ mkdir kuryr-k8s-cni
+$ cd kuryr-k8s-cni
+$ virtualenv env
+$ . env/bin/activate
+# 建議master
+$ git clone https://git.openstack.org/openstack/kuryr-kubernetes -b stable/rocky
+$ pip install -e kuryr-kubernetes
+```
+## 建立配置檔
+```
+$ cd kuryr-kubernetes
+# 可不做
+$ ./tools/generate_config_file_samples.sh
+$ cp etc/kuryr.conf.sample /etc/kuryr/kuryr.conf
+```
+## 編輯配置檔/etc/kuryr/kuryr.conf(k8s node)
+```
+[DEFAULT]
+use_stderr = true
+bindir = /opt/stack/kuryr-k8s-controller/env/libexec/kuryr
+lock_path = /opt/stack/kuryr-k8s-controller/env/local/bin
+[kubernetes]
+api_root = https://10.0.1.97:6443
+#ssl_ca_crt_file = /home/ubuntu/ca.crt
+ssl_ca_crt_file = /etc/kubernetes/pki/ca.crt
+token_file = /home/ubuntu/token
+```
+## 將CNI二進製文件鏈接到CNI目錄，其中kubelet會找到它：
+```
+$ cd /opt/stack/kuryr-k8s-controller/env/local/bin
+$ ln -s $(which kuryr-cni) /opt/cni/bin/
+```
+## 創建/etc/cni/net.d/10-kuryr.conf
+```
+新增
+{
+  "cniVersion": "0.3.1",
+  "name": "kuryr",
+  "type": "kuryr-cni",
+  "kuryr_conf": "/etc/kuryr/kuryr.conf",
+  "debug": true
+}
+或者
+$ cp kuryr-kubernetes/etc/cni/net.d/10-kuryr.conf /etc/cni/net.d
+```
+## 讓10-kuryr.conf為目錄第一個檔案
+```
+$ cd /etc/cni/net.d/
+# 更新元CNI檔案名稱，讓kuryr-cni可在第一個位子
+$ sudo mv 10-flannel.conflist 20-flannel.conflist 
+$ ls /etc/cni/net.d/
+10-kuryr.conf  20-flannel.conflist
+```
+## nstall os-vif and oslo.privsep libraries
+```
+$ deactivate
+$ sudo pip install 'oslo.privsep>=1.20.0' 'os-vif>=1.5.0'
+$ . env/bin/activate
+```
+## 使用sudo全縣執行
+```
+$ sudo su
+$ . env/bin/activate
+$ cd kuryr-kubernetes
+$ kuryr-daemon --config-file /etc/kuryr/kuryr.conf -d
+```
+---
+# 常用指令
+## SSH into Amphorae
+```
+$ ssh -i /etc/octavia/.ssh/octavia_ssh_key ubuntu@[lb_network_ip]
+```
+## Generating a List of Amphorae to Rotate¶
+```
+$ openstack server list --name amphora* --all -c ID -c Status -c Networks
+```
 
 ## 問題解決
 ### 問題一:
