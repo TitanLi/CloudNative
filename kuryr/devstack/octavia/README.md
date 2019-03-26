@@ -39,6 +39,11 @@ $ cd devstack
 在devstack專案目錄下新增**local.conf**檔案，檔案內容如下
 ```
 [[local|localrc]]
+enable_plugin barbican https://git.openstack.org/openstack/barbican
+enable_plugin octavia https://git.openstack.org/openstack/octavia
+enable_plugin octavia-dashboard https://git.openstack.org/openstack/octavia-dashboard
+
+LIBS_FROM_GIT+=python-octaviaclient
 HOST_IP=10.0.1.97
 
 DATABASE_TYPE=mysql
@@ -63,9 +68,7 @@ enable_service q-l3
 enable_service q-svc
 
 # Octavia LBaaSv2
-LIBS_FROM_GIT+=python-octaviaclient
-enable_plugin octavia https://git.openstack.org/openstack/octavia
-# enable_plugin octavia http://github.com/openstack/octavia.git -b stable/rocky
+# LIBS_FROM_GIT+=python-octaviaclient
 enable_service octavia
 enable_service o-api
 enable_service o-cw
@@ -75,7 +78,6 @@ enable_service o-da
 
 NEUTRON_CREATE_INITIAL_NETWORKS=False
 
-
 disable_service etcd3
 
 MULTI_HOST=1
@@ -83,6 +85,7 @@ MULTI_HOST=1
 FLAT_INTERFACE=ens3
 PUBLIC_INTERFACE=eno1
 ```
+
 ## compute node
 在devstack專案目錄下新增**local.conf**檔案，檔案內容如下
 ```

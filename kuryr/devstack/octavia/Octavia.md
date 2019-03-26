@@ -23,3 +23,6 @@ Octavia github:[https://github.com/openstack/octavia](https://github.com/opensta
 
 requirements github:[https://github.com/openstack/requirements](https://github.com/openstack/requirements)
 global-requirements.txt需修改
+
+## 精華
+精華:[https://blog.csdn.net/jmilk/article/details/84338419](https://blog.csdn.net/jmilk/article/details/84338419)
