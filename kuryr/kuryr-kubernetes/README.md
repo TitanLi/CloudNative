@@ -1,4 +1,5 @@
 # kuryr-kubernetes
+# controller node
 ## 安裝 kuryr-k8s-controller 在 virtualenv:
 ```
 $ sudo apt install -y python-pip
@@ -220,6 +221,7 @@ $ openstack subnet create --project admin --network services --no-dhcp --gateway
 +-------------------+--------------------------------------+
 ```
 5. 建立一個router，把pod subnet和service subnet的Gateway都連起來(可使用Web Dashboard建立，可開DHCP)
+> 可連接public network方便之後測試使用
 ```
 $ openstack router create --project admin kuryr-kubernetes
 +-------------------------+--------------------------------------+
@@ -326,7 +328,8 @@ ovs_bridge = br-int
 pod_subnet = 3ae27db6-a995-4950-b3e0-059a72a2206f
 service_subnet = c3e52567-5202-4396-954b-806ce64094ed
 ```
-6. 建立一個security group，允許來自pod network和service network的所有TCP(目前使用default)
+6. 建立一個security group，允許來自pod network和service network的所有TCP(目前使用admin default)
+> 可開啟ICMP、TCP、UDP(Egress和Ingress)
 ```
 # 可使用Web Dashboard建立
 $ openstack security group create --project admin service_pod_access_sg
@@ -520,7 +523,8 @@ $ kuryr-k8s-controller --config-file /etc/kuryr/kuryr.conf -d
 ![Network-Topology.png](https://github.com/TitanLi/OpenStack/blob/master/kuryr/picture/Network-Topology.png)
 
 ---
-# kuryr-cni
+# kubernetes node
+## kuryr-cni
 > kuryr-cni路徑：/opt/stack/kuryr-k8s-controller/env/local/bin
 ## 安裝配置kuryr-CNI在k8s node
 ```
