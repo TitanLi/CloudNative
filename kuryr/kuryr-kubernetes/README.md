@@ -401,7 +401,7 @@ $ openstack loadbalancer create --project admin --vip-address 10.2.0.1 --vip-sub
 ```
 
 > 需等待loadbalancer ACTIVE
-![loadbalancer ACTIVE](https://github.com/TitanLi/OpenStack/tree/master/kuryr/picture/loadbalancer-create.png)
+![loadbalancer ACTIVE](https://github.com/TitanLi/OpenStack/blob/master/kuryr/picture/loadbalancer-create.png)
 
 ```
 $ openstack loadbalancer pool create --name default/kubernetes:HTTPS:443 --protocol HTTPS --lb-algorithm LEAST_CONNECTIONS --loadbalancer b99bb41f-a312-46a9-882e-fb015a5f2686
@@ -515,9 +515,9 @@ $ kuryr-k8s-controller --config-file /etc/kuryr/kuryr.conf -d
 ```
 > 完成狀態
 > 需等待loadbalancer ACTIVE
-![loadbalancer ACTIVE](https://github.com/TitanLi/OpenStack/tree/master/kuryr/picture/loadbalancer-listener-create.png)
+![loadbalancer ACTIVE](https://github.com/TitanLi/OpenStack/blob/master/kuryr/picture/loadbalancer-listener-create.png)
 
-![Network-Topology.png](https://github.com/TitanLi/OpenStack/tree/master/kuryr/picture/Network-Topology.png)
+![Network-Topology.png](https://github.com/TitanLi/OpenStack/blob/master/kuryr/picture/Network-Topology.png)
 
 ---
 # kuryr-cni
