@@ -20,7 +20,7 @@ $ sudo cp etc/kuryr.conf.sample /etc/kuryr/kuryr.conf
 $ sudo vim /etc/kuryr/kuryr.conf
 [DEFAULT]
 use_stderr = true
-bindir = /home/ubuntu/kuryr-k8s-controller/env/libexec/kuryr
+bindir = /opt/stack/kuryr-k8s-controller/env/libexec/kuryr
 [kubernetes]
 api_root = https://10.0.1.98:6443
 ssl_ca_crt_file = /etc/kubernetes/pki/ca.crt
@@ -29,12 +29,12 @@ token_file = /home/ubuntu/token
 auth_url = http://10.0.1.98/identity
 username = admin
 user_domain_name = Default
-password = ADMIN_PASS
+password = password(ADMIN_PASS)
 project_name = admin
 project_domain_name = Default
 auth_type = password
 [neutron_defaults]
-vs_bridge = br-int
+ovs_bridge = br-int
 pod_security_groups = 5c0ddafd-1c06-4207-adbd-2e72d73cc810
 pod_subnet = 5b03e5b7-d331-41e5-94e5-eee95ca0892b
 project = 37ea8f533f6b4287a4a9bdd73a249404
@@ -75,6 +75,9 @@ namespace:  7 bytes
 token:      eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6InRpdGFuLXNhLXRva2VuLTg5ZzR4Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6InRpdGFuLXNhIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQudWlkIjoiM2NlODc3MjgtMWVkMi0xMWU5LWIwNWItMTRjYzIwMDA3OWQwIiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50OmRlZmF1bHQ6dGl0YW4tc2EifQ.kJUWJQJEB84lLMHyboRJAufgTXiYvBCMTocffXJcN0nKrZQ3828BOUbzjWuzYJ-5KEq-I2fSP8ZJ_R-zTxc37df6hinb2lBWaxJyTeOrYOo99MoGDhaWRgr-HhpLwMpoSNtTFv7aq6Nbs2X4vEbN1NPN_s1sjZysMnIh_RuCuWrdvW-UmIshYTp-uAnzUluDHPhDpVNLlsgZQItuhGPsCEBfBq_Y6D0g5clPQwh3i6ic9hwC0WcOmRRas8UdZ3Ti2lFKP98vgP7YnXOQxGNtNC8UaLTnyQFTh7KpsybriEj1So0XFvjyyZoB_vEb8SA6byBNP68ctn_XgWXov_W5yg
 ca.crt:     1025 bytes
 
+# 新增token file
+$ vim /home/ubuntu/token
+
 $ kubectl get secret titan-sa-token-89g4x
 NAME                   TYPE                                  DATA   AGE
 titan-sa-token-89g4x   kubernetes.io/service-account-token   3      27m
@@ -91,7 +94,7 @@ $ kubectl delete clusterrolebinding  titan-binding
 ## 建立網路
 1. 建立一個k8s project
 2. 建立一個k8s user(目前使用admin)
-3. 建立pod network ，kuryr建議子網設定是10.1.0.0/16,Gateway:10.1.255.254
+3. 建立pod network ，kuryr建議子網設定是10.1.0.0/16,Gateway:10.1.255.254(可使用Web Dashboard建立，可開DHCP)
 ```
 $ openstack network create --project admin pod
 +---------------------------+--------------------------------------+
@@ -154,7 +157,7 @@ $ openstack subnet create --project admin --network pod --no-dhcp --gateway 10.1
 +-------------------+--------------------------------------+
 ```
 4. 建立service network ，kuryr建議子網設定是10.2.0.0/16,Gateway:10.2.255.254
-                        subnet pool只給10.2.128.1~10.2.255.253，前半留給loadbalancer
+                        subnet pool只給10.2.128.1~10.2.255.253，前半留給loadbalancer(可使用Web Dashboard建立，可開DHCP)
 ```
 $ openstack network create --project admin services
 +---------------------------+--------------------------------------+
@@ -216,7 +219,7 @@ $ openstack subnet create --project admin --network services --no-dhcp --gateway
 | updated_at        | 2019-03-15T06:39:20Z                 |
 +-------------------+--------------------------------------+
 ```
-5. 建立一個router，把pod subnet和service subnet的Gateway都連起來
+5. 建立一個router，把pod subnet和service subnet的Gateway都連起來(可使用Web Dashboard建立，可開DHCP)
 ```
 $ openstack router create --project admin kuryr-kubernetes
 +-------------------------+--------------------------------------+
@@ -325,6 +328,7 @@ service_subnet = c3e52567-5202-4396-954b-806ce64094ed
 ```
 6. 建立一個security group，允許來自pod network和service network的所有TCP(目前使用default)
 ```
+# 可使用Web Dashboard建立
 $ openstack security group create --project admin service_pod_access_sg
 +-----------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Field           | Value                                                                                                                                                 |
@@ -341,6 +345,7 @@ $ openstack security group create --project admin service_pod_access_sg
 | updated_at      | 2019-03-15T06:56:18Z                                                                                                                                  |
 +-----------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+
 
+# 需執行，目前使用default
 $ openstack security group rule create --project admin --remote-ip 10.2.0.0/16 --ethertype IPv4 --protocol tcp service_pod_access_sg
 +-------------------+--------------------------------------+
 | Field             | Value                                |
@@ -393,7 +398,12 @@ $ openstack loadbalancer create --project admin --vip-address 10.2.0.1 --vip-sub
 | vip_qos_policy_id   | None                                 |
 | vip_subnet_id       | d33f310d-c40c-443c-9063-87c9a48bbe86 |
 +---------------------+--------------------------------------+
+```
 
+> 需等待loadbalancer ACTIVE
+![loadbalancer ACTIVE](https://github.com/TitanLi/OpenStack/tree/master/kuryr/picture/loadbalancer-create.png)
+
+```
 $ openstack loadbalancer pool create --name default/kubernetes:HTTPS:443 --protocol HTTPS --lb-algorithm LEAST_CONNECTIONS --loadbalancer b99bb41f-a312-46a9-882e-fb015a5f2686
 +----------------------+--------------------------------------+
 | Field                | Value                                |
@@ -420,12 +430,11 @@ $ openstack loadbalancer pool create --name default/kubernetes:HTTPS:443 --proto
 | tls_enabled          | False                                |
 +----------------------+--------------------------------------+
 
-#$ openstack loadbalancer member create --name kuryr-k8s-master --address 192.168.1.2 --protocol-port 6443 347226d2-7538-4fb8-872a-c1fef52ca15e
-$ openstack loadbalancer member create --name kuryr-k8s-master --address 192.168.0.2 --protocol-port 6443 347226d2-7538-4fb8-872a-c1fef52ca15e
+$ openstack loadbalancer member create --name titan4 --address 192.168.0.2 --protocol-port 6443 347226d2-7538-4fb8-872a-c1fef52ca15e
 +---------------------+--------------------------------------+
 | Field               | Value                                |
 +---------------------+--------------------------------------+
-| address             | 192.168.1.2                          |
+| address             | 192.168.0.2                          |
 | admin_state_up      | True                                 |
 | created_at          | 2019-03-20T18:19:30                  |
 | id                  | d61e1b22-8fae-4283-90ed-16de62637c4e |
@@ -472,9 +481,10 @@ $ openstack loadbalancer listener create --name default/kubernetes:HTTPS:443 --p
 | client_authentication       | NONE                                 |
 | client_crl_container_ref    | None                                 |
 +-----------------------------+--------------------------------------+
-
-## 編輯配置檔/etc/kuryr/kuryr.conf(controller node)
 ```
+## 編輯配置檔/etc/kuryr/kuryr.conf(controller node)
+
+```conf
 $ sudo vim /etc/kuryr/kuryr.conf
 [DEFAULT]
 use_stderr = true
@@ -493,7 +503,7 @@ project_name = admin
 project_domain_name = Default
 auth_type = password
 [neutron_defaults]
-vs_bridge = br-int
+ovs_bridge = br-int
 pod_security_groups = 318cc711-0698-42eb-8008-18753a2d0ffc
 pod_subnet = 6485ffa3-c391-4994-98e5-2f2cda42bed0 
 project = 5780affc22444315af6a424d8c92b9d4
@@ -503,11 +513,19 @@ service_subnet = 42b0e3fd-6f7b-4681-ab35-d29f517964e9
 ```
 $ kuryr-k8s-controller --config-file /etc/kuryr/kuryr.conf -d
 ```
+> 完成狀態
+> 需等待loadbalancer ACTIVE
+![loadbalancer ACTIVE](https://github.com/TitanLi/OpenStack/tree/master/kuryr/picture/loadbalancer-listener-create.png)
+
+![Network-Topology.png](https://github.com/TitanLi/OpenStack/tree/master/kuryr/picture/Network-Topology.png)
+
 ---
 # kuryr-cni
 > kuryr-cni路徑：/opt/stack/kuryr-k8s-controller/env/local/bin
 ## 安裝配置kuryr-CNI在k8s node
 ```
+$ sudo apt install -y python-pip
+$ sudo apt install -y virtualenv
 $ mkdir kuryr-k8s-cni
 $ cd kuryr-k8s-cni
 $ virtualenv env
@@ -516,29 +534,45 @@ $ . env/bin/activate
 $ git clone https://git.openstack.org/openstack/kuryr-kubernetes -b stable/rocky
 $ pip install -e kuryr-kubernetes
 ```
-## 建立配置檔
+## 建立配置檔(k8s node)
 ```
 $ cd kuryr-kubernetes
-# 可不做
-$ ./tools/generate_config_file_samples.sh
-$ cp etc/kuryr.conf.sample /etc/kuryr/kuryr.conf
+# 可不用執行
+# $ ./tools/generate_config_file_samples.sh
+$ sudo mkdir -p /etc/kuryr/
+# $ sudo cp etc/kuryr.conf.sample /etc/kuryr/kuryr.conf
 ```
 ## 編輯配置檔/etc/kuryr/kuryr.conf(k8s node)
 ```
 [DEFAULT]
 use_stderr = true
-bindir = /opt/stack/kuryr-k8s-controller/env/libexec/kuryr
-lock_path = /opt/stack/kuryr-k8s-controller/env/local/bin
+bindir = /opt/stack/kuryr-k8s-cni/env/libexec/kuryr
+lock_path = /opt/stack/kuryr-k8s-cni/env/local/bin
 [kubernetes]
 api_root = https://10.0.1.97:6443
 #ssl_ca_crt_file = /home/ubuntu/ca.crt
 ssl_ca_crt_file = /etc/kubernetes/pki/ca.crt
 token_file = /home/ubuntu/token
 ```
-## 將CNI二進製文件鏈接到CNI目錄，其中kubelet會找到它：
+## 複製/etc/kubernetes/pki/ca.crt至Kuryr-cni node：
+kuryr-cni node
 ```
-$ cd /opt/stack/kuryr-k8s-controller/env/local/bin
-$ ln -s $(which kuryr-cni) /opt/cni/bin/
+$ sudo su
+$ mkdir -p /etc/kubernetes/pki/
+
+# 建立kubernetes token
+$ vim /home/ubuntu/token
+```
+kubernetes master
+```
+$ sudo su
+$ scp /etc/kubernetes/pki/ca.crt root@10.0.1.12:/etc/kubernetes/pki/ca.crt
+```
+## 將CNI二進製文件鏈接到CNI目錄，其中kubelet會找到它(k8s node)：
+```
+$ cd /opt/stack/kuryr-k8s-cni/env/local/bin
+$ sudo ln -s $(which kuryr-cni) /opt/cni/bin/
+$ sudo chmod +x /opt/cni/bin/kuryr-cni
 ```
 ## 創建/etc/cni/net.d/10-kuryr.conf
 ```
@@ -567,13 +601,98 @@ $ deactivate
 $ sudo pip install 'oslo.privsep>=1.20.0' 'os-vif>=1.5.0'
 $ . env/bin/activate
 ```
-## 使用sudo全縣執行
+## 使用sudo權限執行
 ```
 $ sudo su
+$ cd /opt/stack/kuryr-k8s-cni/
 $ . env/bin/activate
+$ . /opt/stack/admin-openrc
 $ cd kuryr-kubernetes
 $ kuryr-daemon --config-file /etc/kuryr/kuryr.conf -d
 ```
+---
+# 測試
+## Run Pod (kubernetes master)
+```
+$ vim myapp.yaml
+新增以下內容
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp-pod
+  labels:
+    app: myapp
+spec:
+  containers:
+  - name: myapp-container
+    image: busybox
+    command: ['sh', '-c', 'echo The app is running! && sleep 3600']
+
+$ kubectl apply -f myapp.yaml
+pod/myapp-pod created
+
+$ kubectl get pod
+NAME        READY   STATUS    RESTARTS   AGE
+myapp-pod   1/1     Running   0          18s
+```
+
+# 進入Kubernetes Pod ping OpenStack Instances
+```shell
+$ kubectl exec -ti myapp-pod sh
+/ # ping 10.2.128.24
+PING 10.2.128.24 (10.2.128.24): 56 data bytes
+64 bytes from 10.2.128.24: seq=0 ttl=63 time=2.035 ms
+64 bytes from 10.2.128.24: seq=1 ttl=63 time=2.098 ms
+64 bytes from 10.2.128.24: seq=2 ttl=63 time=1.542 ms
+64 bytes from 10.2.128.24: seq=3 ttl=63 time=1.882 ms
+
+/ # ifconfig
+eth0      Link encap:Ethernet  HWaddr FA:16:3E:82:07:69  
+          inet addr:10.1.0.5  Bcast:0.0.0.0  Mask:255.255.0.0
+          UP BROADCAST RUNNING  MTU:1450  Metric:1
+          RX packets:14 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:6 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:1124 (1.0 KiB)  TX bytes:476 (476.0 B)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+```
+
+# 進入OpenStack Instances ping Kubernetes Pod
+```shell
+$ ping 10.1.0.5
+PING 10.1.0.5 (10.1.0.5): 56 data bytes
+64 bytes from 10.1.0.5: seq=0 ttl=63 time=2.196 ms
+64 bytes from 10.1.0.5: seq=1 ttl=63 time=1.996 ms
+64 bytes from 10.1.0.5: seq=2 ttl=63 time=1.491 ms
+64 bytes from 10.1.0.5: seq=3 ttl=63 time=1.736 ms
+
+$ ifconfig
+eth0      Link encap:Ethernet  HWaddr FA:16:3E:D6:C4:14  
+          inet addr:10.2.128.24  Bcast:10.2.255.255  Mask:255.255.0.0
+          inet6 addr: fe80::f816:3eff:fed6:c414/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1450  Metric:1
+          RX packets:328 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:262 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:34931 (34.1 KiB)  TX bytes:30866 (30.1 KiB)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:16436  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+```
+恭喜成功啦
 ---
 # 常用指令
 ## SSH into Amphorae

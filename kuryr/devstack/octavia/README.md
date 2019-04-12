@@ -28,11 +28,12 @@ $ sudo apt-get update
 ```
 $ sudo useradd -s /bin/bash -d /opt/stack -m stack
 $ echo "stack ALL=(ALL) NOPASSWD: ALL" | sudo tee /etc/sudoers.d/stack
-$ sudo su - stack
+$ sudo su - stack 
 ```
 下載DevStack
 ```
-$ git clone https://git.openstack.org/openstack-dev/devstack -b stable/rocky
+$ git clone https://git.openstack.org/openstack-dev/devstack
+// $ git clone https://git.openstack.org/openstack-dev/devstack -b stable/rocky
 $ cd devstack
 ```
 ## controller node
