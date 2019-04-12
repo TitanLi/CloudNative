@@ -1,6 +1,8 @@
 # kuryr-kubernetes
 # controller node
 ## 安裝 kuryr-k8s-controller 在 virtualenv:
+> 建議進入devstack所使用的使用者
+> sudo su - stack
 ```
 $ sudo apt install -y python-pip
 $ sudo apt install -y virtualenv
@@ -23,11 +25,11 @@ $ sudo vim /etc/kuryr/kuryr.conf
 use_stderr = true
 bindir = /opt/stack/kuryr-k8s-controller/env/libexec/kuryr
 [kubernetes]
-api_root = https://10.0.1.98:6443
+api_root = https://10.0.1.97:6443
 ssl_ca_crt_file = /etc/kubernetes/pki/ca.crt
 token_file = /home/ubuntu/token
 [neutron]
-auth_url = http://10.0.1.98/identity
+auth_url = http://10.0.1.97/identity
 username = admin
 user_domain_name = Default
 password = password(ADMIN_PASS)
@@ -89,7 +91,7 @@ $ kubectl create clusterrolebinding titan-binding --serviceaccount=default:titan
 
 $ kubectl get clusterrolebinding | grep titan
 
-$ kubectl delete clusterrolebinding  titan-binding
+#$ kubectl delete clusterrolebinding  titan-binding
 ```
 
 ## 建立網路
@@ -378,6 +380,7 @@ pod_security_groups = 57a4f2cc-028f-4f70-a28a-7d179a0e66b0
 
 ## 建立loadbalancer
 ```
+# services subnet ID
 $ openstack loadbalancer create --project admin --vip-address 10.2.0.1 --vip-subnet-id d33f310d-c40c-443c-9063-87c9a48bbe86 --name default/kubernetes
 +---------------------+--------------------------------------+
 | Field               | Value                                |
@@ -514,6 +517,9 @@ service_subnet = 42b0e3fd-6f7b-4681-ab35-d29f517964e9
 ```
 ## 運行kuryr-k8s-controller
 ```
+$ cd kuryr-k8s-controller/
+$ . env/bin/activate
+$ cd kuryr-kubernetes/
 $ kuryr-k8s-controller --config-file /etc/kuryr/kuryr.conf -d
 ```
 > 完成狀態
@@ -526,6 +532,7 @@ $ kuryr-k8s-controller --config-file /etc/kuryr/kuryr.conf -d
 # kubernetes node
 ## kuryr-cni
 > kuryr-cni路徑：/opt/stack/kuryr-k8s-controller/env/local/bin
+> 建議在/home/ubuntu/
 ## 安裝配置kuryr-CNI在k8s node
 ```
 $ sudo apt install -y python-pip
@@ -548,10 +555,11 @@ $ sudo mkdir -p /etc/kuryr/
 ```
 ## 編輯配置檔/etc/kuryr/kuryr.conf(k8s node)
 ```
+$ sudo vim /etc/kuryr/kuryr.conf
 [DEFAULT]
 use_stderr = true
-bindir = /opt/stack/kuryr-k8s-cni/env/libexec/kuryr
-lock_path = /opt/stack/kuryr-k8s-cni/env/local/bin
+bindir = /home/ubuntu/kuryr-k8s-cni/env/libexec/kuryr
+lock_path = /home/ubuntu/kuryr-k8s-cni/env/local/bin
 [kubernetes]
 api_root = https://10.0.1.97:6443
 #ssl_ca_crt_file = /home/ubuntu/ca.crt
@@ -570,16 +578,17 @@ $ vim /home/ubuntu/token
 kubernetes master
 ```
 $ sudo su
-$ scp /etc/kubernetes/pki/ca.crt root@10.0.1.12:/etc/kubernetes/pki/ca.crt
+$ scp /etc/kubernetes/pki/ca.crt root@10.0.1.98:/etc/kubernetes/pki/ca.crt
 ```
 ## 將CNI二進製文件鏈接到CNI目錄，其中kubelet會找到它(k8s node)：
 ```
-$ cd /opt/stack/kuryr-k8s-cni/env/local/bin
+$ cd /home/ubuntu/kuryr-k8s-cni/env/local/bin
 $ sudo ln -s $(which kuryr-cni) /opt/cni/bin/
 $ sudo chmod +x /opt/cni/bin/kuryr-cni
 ```
 ## 創建/etc/cni/net.d/10-kuryr.conf
 ```
+$ sudo vim /etc/cni/net.d/10-kuryr.conf
 新增
 {
   "cniVersion": "0.3.1",
@@ -603,14 +612,12 @@ $ ls /etc/cni/net.d/
 ```
 $ deactivate
 $ sudo pip install 'oslo.privsep>=1.20.0' 'os-vif>=1.5.0'
-$ . env/bin/activate
 ```
 ## 使用sudo權限執行
 ```
 $ sudo su
-$ cd /opt/stack/kuryr-k8s-cni/
+$ cd /home/ubuntu/kuryr-k8s-cni/
 $ . env/bin/activate
-$ . /opt/stack/admin-openrc
 $ cd kuryr-kubernetes
 $ kuryr-daemon --config-file /etc/kuryr/kuryr.conf -d
 ```
