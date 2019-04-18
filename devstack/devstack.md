@@ -2,7 +2,7 @@
 
 ## 安裝
 ### 1.網路設定(controller node & compute node)
-```
+```shell
 $ sudo su
 $ echo nameserver 8.8.8.8 > /etc/resolv.conf
 // $ echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf > /dev/null
@@ -50,7 +50,7 @@ $ cd devstack
 
 > FIXED_RANGE表示OpenStack建立雲實例後，該雲實例內部使用的IP
 >> ex:FIXED_RANGE=10.20.0.0/24
-```
+```conf
 [[local|localrc]]
 HOST_IP=10.0.1.97
 GIT_BASE=https://github.com
@@ -72,7 +72,9 @@ NEUTRON_CREATE_INITIAL_NETWORKS=False
 
 MULTI_HOST=1
 
+# FLAT_INTERFACE用於OpenStack控制器和計算節點之間的通訊
 FLAT_INTERFACE=ens3
+# PUBLIC_INTERFACE應該是外部可訪問的介面
 PUBLIC_INTERFACE=eno1
 ```
 
@@ -87,9 +89,9 @@ PUBLIC_INTERFACE=eno1
 SERVICE_HOST=10.0.1.97
 GIT_BASE=https://github.com
 DATABASE_TYPE=mysql
-MYSQL_HOST=10.0.1.97
-RABBIT_HOST=10.0.1.97
-GLANCE_HOSTPORT=10.0.1.97:9292
+MYSQL_HOST=$SERVICE_HOST
+RABBIT_HOST=$SERVICE_HOST
+GLANCE_HOSTPORT=$SERVICE_HOST:9292
 KEYSTONE_AUTH_HOST=$SERVICE_HOST
 KEYSTONE_SERVICE_HOST=$SERVICE_HOST
 LOGFILE=/opt/stack/logs/stack.sh.log
@@ -101,7 +103,6 @@ SERVICE_PASSWORD=password
 PIP_UPGRADE=Flase
 
 # 禁用etcd
-# disable_service etcd3local.conf 
 # disable_service etcd3
 
 # Neutron options
@@ -148,6 +149,12 @@ $ nohup ./stack.sh &> stack.out &
 $ ps -s
 $ ps -aux
 ```
+
+## 常用指令
+mysql -uroot -ppassword -h127.0.0.1
+openstack endpoint list
+openstack service list
+sudo systemctl stop devstack@q
 
 ## 問題解決
 ### 問題一
