@@ -2,6 +2,7 @@
 # controller node
 ## 安裝 kuryr-k8s-controller 在 virtualenv:
 > 建議進入devstack所使用的使用者
+
 > sudo su - stack
 ```
 $ sudo apt install -y python-pip
@@ -531,7 +532,8 @@ $ kuryr-k8s-controller --config-file /etc/kuryr/kuryr.conf -d
 ---
 # kubernetes node
 ## kuryr-cni
-> kuryr-cni路徑：/opt/stack/kuryr-k8s-controller/env/local/bin
+> kuryr-cni路徑：/home/ubuntu/kuryr-k8s-controller/env/local/bin
+
 > 建議在/home/ubuntu/
 ## 安裝配置kuryr-CNI在k8s node
 ```
