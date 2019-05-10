@@ -5,3 +5,6 @@
 
 ## OpenStack Quick Setting
 [OpenStack Quick Setting](https://hackmd.io/s/HkPOFgNXE)
+
+## Neutron Architecture
+[Neutron Architecture](https://github.com/TitanLi/OpenStack/tree/master/markdown/neutron/architecture)
