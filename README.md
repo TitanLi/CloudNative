@@ -7,4 +7,4 @@
 [OpenStack Quick Setting](https://hackmd.io/s/HkPOFgNXE)
 
 ## Neutron Architecture
-[Neutron Architecture](https://github.com/TitanLi/OpenStack/tree/master/markdown/neutron/architecture)
+[Neutron Architecture](https://github.com/TitanLi/OpenStack/blob/master/markdown/neutron/architecture.md)
