@@ -1,7 +1,9 @@
+# sudo apt install sysstat
 import subprocess
 import sys
+import csv
 
-#subprocess.call(['ping', '-c 4','localhost'])
+# subprocess.call(['ping', '-c 4','localhost'])
 
 for num1 in range(0,1):
     for num2 in range(0,100):
