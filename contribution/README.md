@@ -5,9 +5,8 @@
 [https://launchpad.net/openstack](https://launchpad.net/openstack)
 
 2. 註冊帳號成為Foundation Member
-> 信箱需與1.建立Launchpad帳號一致
-
 [https://www.openstack.org/profile](https://www.openstack.org/profile)
+> 信箱需與1.建立Launchpad帳號一致
 
 3. 註冊Girrit帳號
 [https://review.opendev.org/#/q/status:open](https://review.opendev.org/#/q/status:open)
@@ -31,11 +30,11 @@ $ git config --global gitreview.username "TitanLi"
 ```
 
 > 常用指令
->> 查看配置內容：git config --list
->> 配置檔路徑：~/.gitconfig
->> 查看review URI（剛git clone可使用，若git remote add gerrit將會檢查git remote是否正確）：git review -s
->> 查看git remote狀態：git remote -v
->> remove this old remote：git remote rm gerrit
+>> 查看配置內容：git config --list <br>
+>> 配置檔路徑：~/.gitconfig <br>
+>> 查看review URI（剛git clone可使用，若git remote add gerrit將會檢查git remote是否正確）：git review -s <br>
+>> 查看git remote狀態：git remote -v <br>
+>> remove this old remote：git remote rm gerrit <br>
 >> 查看git review狀態：git review -n -v
 
 7. 取得專案
