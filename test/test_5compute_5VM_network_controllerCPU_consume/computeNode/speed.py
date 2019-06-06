@@ -10,17 +10,16 @@ import subprocess
 import sys
 import csv
 import datetime
-import time
 
 client = MongoClient('mongodb://10.20.0.19:27017/')
 db = client['speedTest']
+collection = db['VM1']
 
 app = Flask(__name__)
 
 # http://10.0.1.99:5000/
 @app.route('/')
 def speed():
-    time.sleep(10)
     start = str(datetime.datetime.now())
     print('start time:' + start)
     process = subprocess.Popen(['speedtest-cli','--server','4413'], stdout=subprocess.PIPE)
@@ -34,11 +33,10 @@ def speed():
             for i in range(data.count('')):
                 data.remove('')
             print(data)
-            collection = db['VM1_download']
             collection.insert_one({
                 'startTime':start,
                 'endTime':str(datetime.datetime.now()),
-                'networkNum':request.args.get("network"),
+                'networkNum':float(request.args.get("network")),
                	'dataType':data[0].split(':')[0],
                	'speed':float(data[1]),
                	'unit':data[2]
@@ -48,11 +46,10 @@ def speed():
             for i in range(data.count('')):
                 data.remove('')
             print(data)
-            collection = db['VM1_upload']
             collection.insert_one({
                 'startTime':start,
                 'endTime':str(datetime.datetime.now()),
-                'networkNum':request.args.get("network"),
+                'networkNum':float(request.args.get("network")),
                	'dataType':data[0].split(':')[0],
                	'speed':float(data[1]),
                	'unit':data[2]
@@ -63,3 +60,4 @@ def speed():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
+

@@ -148,6 +148,9 @@ $ ./clean.sh
 $ nohup ./stack.sh &> stack.out &
 $ ps -s
 $ ps -aux
+
+# 即時查看檔案
+$ watch -- tail stack.out
 ```
 
 ## 常用指令
