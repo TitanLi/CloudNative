@@ -1,0 +1,38 @@
+
+tosca_definitions_version: tosca_simple_yaml_1_0
+ 
+description: Template for deploying a single server with predefined properties.
+ 
+topology_template:
+  inputs:
+    cpus:
+      type: integer
+      description: Number of CPUs for the server.
+      # Note that the inputs section of a TOSCA template allows for defining optional constraints on each input parameter to restrict possible user input
+      constraints:
+        - valid_values: [ 1, 2, 4, 8 ]
+ 
+  node_templates:
+    my_server:
+      type: tosca.nodes.Compute
+      capabilities:
+        # Host container properties
+        host:
+          properties:
+            # Compute properties
+            # get_input, get_property or get_attribute
+            num_cpus: { get_input: cpus }
+            mem_size: 2048  MB
+            disk_size: 10 GB
+        os:
+          properties:
+            # host Operating System image properties
+            architecture: x86_64
+            type: linux 
+            distribution: rhel 
+            version: 6.5 
+ 
+  outputs:
+    server_ip:
+      description: The private IP address of the provisioned server.
+      value: { get_attribute: [ my_server, private_address ] }

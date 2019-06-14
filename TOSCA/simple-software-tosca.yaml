@@ -1,0 +1,38 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+description: Template for deploying a single server with MySQL software on top.
+ 
+topology_template:
+  inputs:
+    # omitted here for brevity
+ 
+  node_templates:
+    mysql:
+      type: tosca.nodes.DBMS.MySQL
+      properties:
+        name: { get_input: database_name }
+        user: { get_input: database_user }
+        root_password: { get_input: my_mysql_rootpw }
+        port: { get_input: my_mysql_port }
+      requirements:
+        - host: db_server
+      interfaces:
+        Standard:
+          configure: scripts/my_own_configure.sh
+ 
+    db_server:
+      type: tosca.nodes.Compute
+      capabilities:
+        host:
+          properties:
+            # Compute properties
+            # get_input, get_property or get_attribute
+            num_cpus: { get_input: cpus }
+            mem_size: 2048  MB
+            disk_size: 10 GB
+        os:
+          properties:
+            # host Operating System image properties
+            architecture: x86_64
+            type: linux 
+            distribution: rhel 
+            version: 6.5 
