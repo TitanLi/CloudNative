@@ -584,6 +584,8 @@ $ scp /etc/kubernetes/pki/ca.crt root@10.0.1.98:/etc/kubernetes/pki/ca.crt
 ```
 ## 將CNI二進製文件鏈接到CNI目錄，其中kubelet會找到它(k8s node)：
 ```
+$ cd /home/ubuntu/kuryr-k8s-cni/
+$ . env/bin/activate
 $ cd /home/ubuntu/kuryr-k8s-cni/env/local/bin
 $ sudo ln -s $(which kuryr-cni) /opt/cni/bin/
 $ sudo chmod +x /opt/cni/bin/kuryr-cni
