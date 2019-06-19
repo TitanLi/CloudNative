@@ -1,0 +1,14 @@
+option app_label = "test";
+option name = "test";
+
+message Test (Service){
+    option verbose_name = "test";
+    required string test_message = 1 [help_text = "Service Message to Display", max_length = 254, null = False, db_index = False, blank = False];
+    optional string test_secret = 2 [help_text = "Service Secret to place in a file", null = False, db_index = False, blank = True];
+}
+
+message TestInstance (ServiceInstance){
+    option verbose_name = "testInstance";
+    required string test_tenant_message = 1 [help_text = "Tenant Message to Display", max_length = 254, null = False, db_index = False, blank = False];
+    optional string test_tenant_secret = 2 [help_text = "Tenant Secret to place in a file", null = False, db_index = False, blank = True];
+}
