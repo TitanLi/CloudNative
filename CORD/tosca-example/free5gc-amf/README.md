@@ -2,7 +2,7 @@
 
 ## Install OVS on node host and Add interface to OVS
 ```
-$ apt install openvswitch-switch
+$ apt install -y openvswitch-switch
 $ ovs-vsctl add-br br0
 $ ovs-vsctl add-port br0 ens3
 

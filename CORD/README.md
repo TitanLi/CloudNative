@@ -205,3 +205,9 @@ kubectl exec -ti xos-tosca-5b86cfb5bf-8rndt sh
 
 /opt/xos-tosca/src/tosca/custom_types
 ```
+
+### 技巧
+1. 當應填入值提示為Set of key,value pairs encoded as a json dictionary使用以下方式解決
+
+將yaml轉成json後填入
+[json to yaml](https://www.json2yaml.com/)
