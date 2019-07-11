@@ -2,14 +2,16 @@
 # additional groups are for more control of the environment.
 [control]
 # These hostname must be resolvable from your deployment host
-controller neutron_external_interface=ens3 api_interface=eno1 network_interface=eno1 tunnel_interface=eno1 ansible_user=root
+controller1 neutron_external_interface=ens3 api_interface=eno1 network_interface=eno1 tunnel_interface=eno1 ansible_user=root
+
 # The above can also be specified as follows:
 #control[01:03]     ansible_user=kolla
 
 # The network nodes are where your l3-agent and loadbalancers will run
 # This can be the same as a host in the control group
 [network]
-controller neutron_external_interface=ens3 api_interface=eno1 network_interface=eno1 tunnel_interface=eno1 ansible_user=root
+controller1 neutron_external_interface=ens3 api_interface=eno1 network_interface=eno1 tunnel_interface=eno1 ansible_user=root
+
 # inner-compute is the groups of compute nodes which do not have
 # external reachability.
 # DEPRECATED, the group will be removed in S release of OpenStack,
@@ -21,25 +23,25 @@ controller neutron_external_interface=ens3 api_interface=eno1 network_interface=
 # DEPRECATED, the group will be removed in S release of OpenStack,
 # use variable neutron_compute_dvr_mode instead.
 [external-compute]
-compute1 api_interface=enp2s0 neutron_external_interface=enp3s0 network_interface=enp2s0 tunnel_interface=enp2s0  ansible_user=root
+compute1 neutron_external_interface=ens3 api_interface=eno1 network_interface=eno1 tunnel_interface=eno1 ansible_user=root
 
 [compute:children]
 inner-compute
 external-compute
 
 [monitoring]
-controller
-compute1 api_interface=enp2s0 neutron_external_interface=enp3s0 network_interface=enp2s0 tunnel_interface=enp2s0 ansible_user=root
+#monitoring01
+
 # When compute nodes and control nodes use different interfaces,
 # you need to comment out "api_interface" and other interfaces from the globals.yml
 # and specify like below:
 #compute01 neutron_external_interface=eth0 api_interface=em1 storage_interface=em1 tunnel_interface=em1
 
 [storage]
-compute1 api_interface=enp2s0 neutron_external_interface=enp3s0 network_interface=enp2s0 tunnel_interface=enp2s0 ansible_user=root
+compute1 neutron_external_interface=ens3 api_interface=eno1 network_interface=eno1 tunnel_interface=eno1 ansible_user=root
 
 [deployment]
-localhost       ansible_connection=local api_interface=eno1 network_interface=eno1
+controller1       ansible_connection=local
 
 [baremetal:children]
 control
@@ -120,7 +122,17 @@ control
 [qdrouterd:children]
 control
 
+[monasca-agent:children]
+compute
+control
+monitoring
+network
+storage
+
 [monasca:children]
+monitoring
+
+[storm:children]
 monitoring
 
 [mongodb:children]
@@ -447,7 +459,19 @@ murano
 murano
 
 # Monasca
+[monasca-agent-collector:children]
+monasca-agent
+
+[monasca-agent-forwarder:children]
+monasca-agent
+
+[monasca-agent-statsd:children]
+monasca-agent
+
 [monasca-api:children]
+monasca
+
+[monasca-grafana:children]
 monasca
 
 [monasca-log-api:children]
@@ -458,6 +482,25 @@ monasca
 
 [monasca-log-persister:children]
 monasca
+
+[monasca-log-metrics:children]
+monasca
+
+[monasca-thresh:children]
+monasca
+
+[monasca-notification:children]
+monasca
+
+[monasca-persister:children]
+monasca
+
+# Storm
+[storm-worker:children]
+storm
+
+[storm-nimbus:children]
+storm
 
 # Ironic
 [ironic-api:children]
