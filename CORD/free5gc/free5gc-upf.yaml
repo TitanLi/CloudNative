@@ -1,0 +1,61 @@
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: free5gc-upf-deployment
+spec:
+  selector:
+    matchLabels:
+      app: free5gc-upf
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: free5gc-upf
+    spec:
+      containers:      
+      - name: free5gc-upf-container
+        image: cewuandy/free5gc-base
+        securityContext:
+          privileged: true
+        command: ["/bin/sh"]
+        args: ["-c", "/root/free5gc/setup-uptun.sh && sh -c /root/free5gc/free5gc-upfd"]
+        volumeMounts:
+          - mountPath: /dev/net/tun
+            name: tun-volume
+          - name: free5gc-config
+            mountPath: /root/free5gc/install/etc/free5gc/free5gc.conf
+            subPath: free5gc.conf
+      initContainers:
+      - name: init-network-client
+        image: sdnvortex/network-controller:v0.4.9
+        command: ["/go/bin/client"]
+        args: ["-s=unix:///tmp/vortex.sock", "-b=br0", "-n=eth1", "-i=192.188.2.5/24"]
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_UUID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.uid
+        volumeMounts:
+        - mountPath: /tmp/
+          name: grpc-sock
+      volumes:
+      - name: grpc-sock
+        hostPath:
+          path: /tmp/vortex/
+      - name: tun-volume
+        hostPath:
+          path: /dev/net/tun
+      - name: free5gc-config
+        configMap:
+          name: free5gc-configmap
+          items:
+          - key: free5gc.conf
+            path: free5gc.conf

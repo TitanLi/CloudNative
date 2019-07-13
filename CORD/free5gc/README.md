@@ -4,6 +4,8 @@
 ```
 $ apt install -y openvswitch-switch
 $ ovs-vsctl add-br br0
+
+# 第二張網卡
 $ ovs-vsctl add-port br0 ens3
 
 $ vim /etc/network/interfaces.d/50-cloud-init.cfg
@@ -23,7 +25,18 @@ $ sudo service networking restart
 $ kubectl apply -f ./mongoDB/free5gc-mongodb.yaml
 $ kubectl apply -f ./config
 
-# $ kubectl get pod -n kube-system
+$ kubectl get pod -n kube-system
+network-controller-server-unix-5cxwg   1/1     Running   0          39s
+network-controller-server-unix-png47   1/1     Running   0          39s
+
+$ kubectl get cm
+free5gc-configmap                1      69s
+free5gc-freediameter-configmap   2      68s
 
 $ kubectl apply -f free5gc-amf.yaml
+
+$ kubectl get pod
+NAME                                      READY   STATUS    RESTARTS   AGE
+free5gc-amf-deployment-68765894f6-pv6tz   1/1     Running   0          3m28s
+free5gc-mongodb-76c49fdcf-hxnd5           1/1     Running   0          5m29s
 ```
