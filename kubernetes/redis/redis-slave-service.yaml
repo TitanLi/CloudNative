@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: redia-slave
+  labels:
+    name: redis-slave
+spec:
+  ports:
+  - port: 6379
+  # 確認哪些Pod(Label)對應到本Service
+  selector:
+    name: redis-slave

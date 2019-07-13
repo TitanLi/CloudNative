@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+# Service Name
+  name: redis-master
+  labels:
+    name: redis-master
+spec:
+  ports:
+  # 定義Service對外port
+  - port: 6379
+  # 提供該容器expose port
+    targetPort: 6379
+  # 確認哪些Pod(Label)對應到本Service
+  selector:
+    name: redis-master

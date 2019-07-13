@@ -84,6 +84,12 @@ $ kubeadm join 10.0.1.97:6443 --token 8jh9ea.n9ap6l78kdlknop2 \
     --discovery-token-ca-cert-hash sha256:23f9c3d418db8c334a213cc72cd540de245f37271abebf6f4b5acd8e05dd2ba2 
 ```
 
+## 7-3 查看join command
+```
+$ kubeadm token create --print-join-command
+kubeadm join 10.0.1.11:6443 --token qar5kk.j4nnd3rpidzvvpyl --discovery-token-ca-cert-hash sha256:4ef1b9452e6535deb38ce627481d1ae2fb69a6f68e1a235692f055c9ec7b1c80
+```
+
 ## 8. Installing a pod network add-on (CNI Plugin - Flannel)
 ```
 $ kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/62e44c867a2846fefb68bd5f178daf4da3095ccb/Documentation/kube-flannel.yml
