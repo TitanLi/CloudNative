@@ -1,4 +1,5 @@
 # kolla-ansible
+[openstack/kolla-ansible](https://github.com/openstack/kolla-ansible)
 
 ## Install dependencies
 master、node
@@ -11,6 +12,8 @@ $ sudo apt-get install -y python-dev libffi-dev gcc libssl-dev python-selinux py
 master、node
 ```
 $ sudo apt-get install -y python-pip
+$ pip --version
+$ sudo su
 $ pip install -U pip
 ```
 
@@ -55,6 +58,7 @@ $ pip install ansible
 ```
 
 ## Configure Ansible
+master
 ```
 $ vim /etc/ansible/ansible.cfg
 [defaults]
@@ -80,6 +84,22 @@ $ cp -r kolla-ansible/etc/kolla/* /etc/kolla
 /etc/kolla/passwords.yml
 > 隨機產生密碼
 $ python kolla-ansible/tools/generate_passwords.py
+```
+
+## 編輯/etc/hosts
+master、node
+```
+$ vim /etc/hosts
+127.0.0.1 localhost
+10.0.1.97 controller1
+10.0.1.98 compute1
+```
+
+## 編輯DNS
+master、node
+```
+$ vim /etc/resolv.conf
+nameserver 8.8.8.8
 ```
 
 ## Prepare initial configuration(multinode)
@@ -108,6 +128,7 @@ compute1 neutron_external_interface=ens3 api_interface=eno1 network_interface=en
 
 [monitoring]
 #monitoring01
+compute1 neutron_external_interface=ens3 api_interface=eno1 network_interface=eno1 tunnel_interface=eno1 ansible_user=root
 
 [storage]
 compute1 neutron_external_interface=ens3 api_interface=eno1 network_interface=eno1 tunnel_interface=eno1 ansible_user=root
@@ -158,7 +179,24 @@ $ openstack image create "cirros" \
 
 ## Create network
 ```
+# Flat Physical Network
 physical_interface_mappings = physnet1:{{ neutron_external_interface }
+```
+
+## 環境移除
+[Operating Kolla](https://docs.openstack.org/kolla-ansible/rocky/user/operating-kolla.html)
+```
+#清理容器
+$ kolla-ansible/tools/cleanup-containers
+
+#清理配置
+$ kolla-ansible/tools/cleanup-host
+
+#清理docker镜像
+$ kolla-ansible/tools/cleanup-images
+
+#clean up containers and volumes in the cluster --all
+$ kolla-ansible/tools/kolla-ansible destroy  -i kolla-ansible/ansible/inventory/multinode --yes-i-really-really-mean-it
 ```
 
 ## 問題解決
@@ -177,3 +215,5 @@ pip install -U docker
 ```
 $ lsblk
 ```
+
+沒有為Mistral設置數據庫以供使用。在繼續之前，您應該確保您擁有以下││信息：││││*您要使用的數據庫類型; ││*數據庫服務器主機名（該服務器必須允許來自此│機器的TCP連接）; ││*用於訪問數據庫的用戶名和密碼。 ││││││如果缺少其中一些要求，請不要選擇此選項並使用常規SQLite支持運行。 ││││您可以稍後通過運行“dpkg-reconfigure -plow mistral-common”來更改此設置。 ││││為米斯特拉爾建立數據庫？
