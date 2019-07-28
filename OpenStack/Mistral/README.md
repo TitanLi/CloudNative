@@ -104,7 +104,7 @@ $ cp -b mistraldashboard/enabled/_50_mistral.py /usr/share/openstack-dashboard/o
 ```
 $ service apache2 restart
 ```
-[Mistral horizon](https://i.imgur.com/3ujmzUI.png)
+！[Mistral horizon](https://i.imgur.com/3ujmzUI.png)
 
 ## 運行Mistral server
 ```
@@ -154,6 +154,7 @@ $ mistral service-list
 
 ## 技巧
 [https://blog.csdn.net/tpiperatgod/article/details/56282219](https://blog.csdn.net/tpiperatgod/article/details/56282219)
+[語法教學](https://docs.openstack.org/mistral/latest/user/wf_lang_v2.html)
 ### 常用指令
 #### action
 ```
@@ -262,7 +263,7 @@ my_workflow:
         - wait_for_all_tasks
     # 第二個task名稱
     task2:
-      action: std.echo output="Done"
+      action: std.echo output=<% $.vm_id %>
       # 透過retry設定輪詢間隔與時間
       retry:
         delay: 5
@@ -298,6 +299,7 @@ tasks:
 ```
 2. Reverse Workflow
 > 此task是屬於反向依賴，意思是執行A，如果A宣告依賴於B、C，則需要先執行B、C
+>> 可使用requires
 >> 需注意Reverse Workflow不能使用on-success、on-error以及on-complete指令
 ```
 tasks:
@@ -309,7 +311,333 @@ tasks:
   C:
     action: action.z
 ```
+> 執行reverse需建立目標任務
+```s
+$ vim task_name.json
+
+{
+    "task_name": "task2"
+}
+```
+> 執行方式
+```
+$ mistral execution-create REVERSE-WORKFLOW-NAME {} task_name.json 
+```
+3. task有兩種寫法
+```yaml
+action_based_task:
+  action: std.http url='openstack.org'
+
+workflow_based_task1:
+  # 可用來調用其他workflow
+  workflow: workflow_based_task2
+
+workflow_based_task2:
+  # 可用來調用其他workflow
+  workflow: backup_vm_workflow vm_id=<% $.vm_id %>
+```
+4. workbook
+> 編輯workbook檔案
+```yaml
+$ vim my_workbook.yaml
+
+version: '2.0'
+
+name: my_workbook
+
+description: My set of workflows and ad-hoc actions
+
+workflows:
+  local_workflow1:
+    type: direct
+
+    tasks:
+      task1:
+        action: local_Ad_hoc_action str1='Hi' str2='Titan'
+        on-complete:
+          - task2
+
+      task2:
+        action: std.echo output='local_workflow1 complete'
+
+  local_workflow2:
+    type: reverse
+
+    tasks:
+      task1:
+        workflow: local_workflow1
+
+      task2:
+        action: std.echo output='local_workflow2 complete'
+        requires: [task1]
+
+actions:
+  local_Ad_hoc_action:
+    input:
+      - str1
+      - str2
+    base: std.echo output="<% $.str1 %><% $.str2 %>"
+```
+> 建立workbook
+```s
+$ mistral workbook-create my_workbook.yaml 
++------------+---------------------+
+| Field      | Value               |
++------------+---------------------+
+| Name       | my_workbook         |
+| Tags       | <none>              |
+| Created at | 2019-07-26 08:34:40 |
+| Updated at | None                |
++------------+---------------------+
+```
+> 查看workflow、action建立狀況
+```s
+# my_workbook workflow已建立
+$ mistral workflow-list | grep 'my_workbook'
+| 86b558a0-3484-4fe3-9408-397824d2706f | my_workbook.local_workflow2 |           | aeee8a0d64ba46a78b5664b994d8a16d | <none> |                              | 2019-07-26 08:34:40 | None       |
+| 99fefe5a-d0db-4aab-a371-560451ba7e4b | my_workbook.local_workflow1 |           | aeee8a0d64ba46a78b5664b994d8a16d | <none> |                              | 2019-07-26 08:34:40 | None       |
+
+# my_workbook action已建立
+$ mistral action-list | grep 'my_workbook'
+| 1d3c7f6e-8085-438a-bec1-78f202df5fc8 | my_workbook.local_Ad_hoc_action                                           | False     | str1, str2                   | None                         | <none> | 2019-07-26 08:34:40 | None       |
+```
+> 測試my_workbook.local_workflow1
+```s
+$ mistral execution-create my_workbook.local_workflow1
++--------------------+--------------------------------------+
+| Field              | Value                                |
++--------------------+--------------------------------------+
+| ID                 | 43147883-0d3b-4c5d-a44c-a397f4399431 |
+| Workflow ID        | 99fefe5a-d0db-4aab-a371-560451ba7e4b |
+| Workflow name      | my_workbook.local_workflow1          |
+| Workflow namespace |                                      |
+| Description        |                                      |
+| Task Execution ID  | <none>                               |
+| State              | RUNNING                              |
+| State info         | None                                 |
+| Created at         | 2019-07-26 08:40:06                  |
+| Updated at         | 2019-07-26 08:40:06                  |
++--------------------+--------------------------------------+
+
+$ mistral task-list 43147883-0d3b-4c5d-a44c-a397f4399431
++--------------------------------------+-------+-----------------------------+--------------------+--------------------------------------+---------+------------+---------------------+---------------------+
+| ID                                   | Name  | Workflow name               | Workflow namespace | Execution ID                         | State   | State info | Created at          | Updated at          |
++--------------------------------------+-------+-----------------------------+--------------------+--------------------------------------+---------+------------+---------------------+---------------------+
+| 11e1ef18-48a0-4d78-8916-e3487c85db92 | task1 | my_workbook.local_workflow1 |                    | 43147883-0d3b-4c5d-a44c-a397f4399431 | SUCCESS | None       | 2019-07-26 08:40:06 | 2019-07-26 08:40:06 |
+| e899976d-b825-495d-ba4d-c7c05982f8ed | task2 | my_workbook.local_workflow1 |                    | 43147883-0d3b-4c5d-a44c-a397f4399431 | SUCCESS | None       | 2019-07-26 08:40:06 | 2019-07-26 08:40:06 |
++--------------------------------------+-------+-----------------------------+--------------------+--------------------------------------+---------+------------+---------------------+---------------------+
+
+$ mistral task-get-result 11e1ef18-48a0-4d78-8916-e3487c85db92
+"HiTitan"
+
+$ mistral task-get-result e899976d-b825-495d-ba4d-c7c05982f8ed
+"local_workflow1 complete"
+```
+> 執行reverse需建立目標任務
+```s
+$ vim task_name.json
+
+{
+    "task_name": "task2"
+}
+```
+> 執行my_workbook.local_workflow2
+```s
+$ mistral execution-create my_workbook.local_workflow2 {} task_name.json 
++--------------------+--------------------------------------+
+| Field              | Value                                |
++--------------------+--------------------------------------+
+| ID                 | a452c2d7-678a-40a9-a924-479c6a276ff7 |
+| Workflow ID        | 86b558a0-3484-4fe3-9408-397824d2706f |
+| Workflow name      | my_workbook.local_workflow2          |
+| Workflow namespace |                                      |
+| Description        |                                      |
+| Task Execution ID  | <none>                               |
+| State              | RUNNING                              |
+| State info         | None                                 |
+| Created at         | 2019-07-26 08:44:15                  |
+| Updated at         | 2019-07-26 08:44:15                  |
++--------------------+--------------------------------------+
+
+# 驗證reverse有成功執行my_workbook.local_workflow1、my_workbook.local_workflow2
+$ mistral task-list
++--------------------------------------+-------+-----------------------------+--------------------+--------------------------------------+---------+------------+---------------------+---------------------+
+| ID                                   | Name  | Workflow name               | Workflow namespace | Execution ID                         | State   | State info | Created at          | Updated at          |
++--------------------------------------+-------+-----------------------------+--------------------+--------------------------------------+---------+------------+---------------------+---------------------+
+| 15484fe1-9472-4a38-a497-8967f9a26ab4 | task1 | my_workbook.local_workflow1 |                    | 55757a13-1f9d-4eef-8f77-d0af6dbb4a01 | SUCCESS | None       | 2019-07-26 08:44:15 | 2019-07-26 08:44:15 |
+| 45527527-19be-49aa-a4f7-3696fd4b110a | task1 | my_workbook.local_workflow2 |                    | a452c2d7-678a-40a9-a924-479c6a276ff7 | SUCCESS | None       | 2019-07-26 08:44:15 | 2019-07-26 08:44:16 |
+| c3952f9e-ccd4-4221-9246-f9a34f68e1e5 | task2 | my_workbook.local_workflow1 |                    | 55757a13-1f9d-4eef-8f77-d0af6dbb4a01 | SUCCESS | None       | 2019-07-26 08:44:15 | 2019-07-26 08:44:15 |
+| f3fed629-8d7d-4ddc-9071-dbb34411eb09 | task2 | my_workbook.local_workflow2 |                    | a452c2d7-678a-40a9-a924-479c6a276ff7 | SUCCESS | None       | 2019-07-26 08:44:16 | 2019-07-26 08:44:16 |
++--------------------------------------+-------+-----------------------------+--------------------+--------------------------------------+---------+------------+---------------------+---------------------+
+
+$ mistral task-get-result 15484fe1-9472-4a38-a497-8967f9a26ab4
+"HiTitan"
+
+$ mistral task-get-result c3952f9e-ccd4-4221-9246-f9a34f68e1e5
+"local_workflow1 complete"
+
+$ mistral task-get-result 45527527-19be-49aa-a4f7-3696fd4b110a
+{}
+
+$ mistral task-get-result f3fed629-8d7d-4ddc-9071-dbb34411eb09
+"local_workflow2 complete"
+```
+### Task policies
+```yaml
+my_task:
+  action: my_action
+  # Specifies whether Mistral Engine should put the workflow on pause or not before starting a task.
+  pause-before: true
+  # Specifies a delay in seconds that Mistral Engine should wait before starting a task.
+  wait-before: 2
+  # Specifies a delay in seconds that Mistral Engine should wait after a task has completed before starting the tasks specified in ‘on-success’, ‘on-error’ or ‘on-complete’.
+  wait-after: 4
+  # Specifies a period of time in seconds after which a task will be failed automatically by the engine if it hasn’t completed.
+  timeout: 30
+  # Specifies a pattern for how the task should be repeated.
+  retry:
+    # Specifies a maximum number of times that a task can be repeated.
+    count: 10
+    # Specifies a delay in seconds between subsequent task iterations.
+    delay: 20
+    # Specifies a YAQL expression that will break the iteration loop if it evaluates to ‘true’. If it fires then the task is considered to have experienced an error.
+    break-on: <% $.my_var = true %>
+    # Specifies a YAQL expression that will continue the iteration loop if it evaluates to ‘true’. If it fires then the task is considered successful.
+    continue-on: <% $.my_var = true %>
+  keep-result: Boolean value allowing to not store action results after task completion (e.g. if they are large and not needed afterwards). Optional. By default is ‘true’.
+
+  target: String parameter. It defines an executor to which task action should be sent to. Target here physically means a name of executors group but task will be run only on one of them. Optional.
+  concurrency: Configures concurrency policy. Optional.
+  safe-rerun: Configures safe-rerun policy. Optional.
+```
+### task input
+1. 方法一
+```yaml
+my_task:
+  action: std.http
+  input:
+    url: http://mywebsite.org
+    method: GET
+```
+2. 方法二
+```yaml
+my_task:
+  action: std.http url="http://mywebsite.org" method="GET"
+```
+3. 方法三
+```yaml
+---
+version: '2.0'
+
+example_workflow:
+  input:
+    - http_request_parameters:
+        url: http://mywebsite.org
+        method: GET
+
+  tasks:
+    setup_task:
+      action: std.http
+      input: <% $.http_request_parameters %>
+```
+### task publish
+> 對於A1其變數永遠為1，B1其變數永遠為2，因為是採上下關係A->A1、B->B1，而非程式順序
+```yaml
+version: '2.0'
+wf:
+  tasks:
+    A:
+      # 不執行任何操作action需填std.noop
+      action: std.noop
+      publish:
+        my_var: 1
+      on-success: A1
+    A1:
+      action: my_action param1=<% $.my_var %>
+    B:
+      action: std.noop
+      publish:
+        my_var: 2
+      on-success: B1
+    B1:
+      action: my_action param1=<% $.my_var %>
+```
+> 進階用法
+>> global為全域變數
+>> branch只會傳到之後的task
+>> A task結果："global=>global value  branch=>branch value"
+>> B task結果："global=>global value  branch=>global value"
+```yaml
+---
+version: '2.0'
+
+publish-test:
+  tasks:
+    publish-test:
+      action: std.noop
+      on-success:
+        publish:
+          global:
+            my_var: "global value"
+          branch:
+            my_var: "branch value"
+        next:
+          - A
+    A:
+      action: std.echo output='global=><% global(my_var) %>  branch=><% $.my_var%>'
+
+    B:
+      # 等待前方task執行完畢，否則global my_var會是null
+      wait-before: 2
+      action: std.echo output='global=><% global(my_var) %>  branch=><% $.my_var%>'
+```
+### multi-with-items
+> YAQL_expression_1、YAQL_expression_2、YAQL_expression_N大小需相同，Mistral會平行處理
+```yaml
+with-items:
+  - var1 in <% YAQL_expression_1 %>
+  - var2 in <% YAQL_expression_2 %>
+  ...
+  - varN in <% YAQL_expression_N %>
+```
+### 變數取用
+```yaml
+# 變數取得
+<% $.vm_names %>
+# 取得變數list長度
+<% $.vm_names.len() * 10 %>
+# 取的task result data
+<% $.TASK-NAME.ID %>
+<% task(TASK-NAME).result.id %>
+```
+### 刪除技巧
+```shell
+# 刪除所有execution
+$ mistral execution-delete $(mistral execution-list | awk '{print $2}')
+# 刪除execution status ERROR
+$ mistral execution-delete $(mistral execution-list | grep 'ERROR' | awk '{print $2}')
+# 刪除workflow
+$ mistral workflow-delete $(mistral workflow-list | grep 'my_workbook' | awk '{print $2}')
+# 刪除action
+$ mistral action-delete $(mistral action-list | grep 'my_workbook' | awk '{print $2}')
+```
+### 尋找ERROR
+```
+$ mistral execution-list | grep "ERROR";
+$ mistral execution-get {execution-list-ID}
+$ mistral action-execution-list {task-list_ID}
+```
 ## 開始使用
+### 執行順序
+```
+$ mistral workflow-create my_workflow.yaml
+$ mistral execution-create my_workflow '{"names": ["John", "Mistral", "Ivan", "Crystal"]}'
+$ mistral execution-list
+$ mistral task-list {execution-list-ID}
+$ mistral task-get-result {task-list-ID}
+$ mistral action-execution-list {task-list_ID}
+$ mistral action-execution-get-output {action-execution-list_ID}
+```
 ### 建立workflow(建立任務模板)
 > name:是一組參數 <br>
 > with-times:是workflow的一個指令，可以想像就是for in功能 <br>
