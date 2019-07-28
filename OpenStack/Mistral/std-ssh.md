@@ -1,7 +1,7 @@
 # std.ssh
 
 ## 新增ssh_workflow
-```
+```yaml
 $ vim ssh_workflow.yaml
 version: '2.0'
 
@@ -24,12 +24,12 @@ ssh_workflow:
 ```
 
 ## 建立workflow
-```
+```shell
 $ mistral workflow-create ssh_workflow.yaml
 ```
 
 ## 建立execution
-```
+```shell
 $ mistral execution-create ssh_workflow '{"host":"10.0.1.99","username":"ubuntu","password":"ubuntu"}'
 +--------------------+--------------------------------------+
 | Field              | Value                                |
@@ -48,7 +48,7 @@ $ mistral execution-create ssh_workflow '{"host":"10.0.1.99","username":"ubuntu"
 ```
 
 ## 查看執行結果
-```
+```shell
 $ mistral task-list 9db73b85-6e79-4d9f-b2cf-b86da9e70685
 +--------------------------------------+-------+---------------+--------------------+--------------------------------------+---------+------------+---------------------+---------------------+
 | ID                                   | Name  | Workflow name | Workflow namespace | Execution ID                         | State   | State info | Created at          | Updated at          |
@@ -62,7 +62,7 @@ $ mistral task-get-result 43a8f4eb-a8da-43c8-bd91-1f9eb66e654f
 ```
 
 ## 刪除環境
-```
+```shell
 $ mistral execution-delete 9db73b85-6e79-4d9f-b2cf-b86da9e70685
 $ mistral workflow-delete ssh_workflow
 ```

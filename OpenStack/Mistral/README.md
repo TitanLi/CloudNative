@@ -312,7 +312,7 @@ tasks:
     action: action.z
 ```
 > 執行reverse需建立目標任務
-```s
+```shell
 $ vim task_name.json
 
 {
@@ -379,7 +379,7 @@ actions:
     base: std.echo output="<% $.str1 %><% $.str2 %>"
 ```
 > 建立workbook
-```s
+```shell
 $ mistral workbook-create my_workbook.yaml 
 +------------+---------------------+
 | Field      | Value               |
@@ -391,7 +391,7 @@ $ mistral workbook-create my_workbook.yaml
 +------------+---------------------+
 ```
 > 查看workflow、action建立狀況
-```s
+```shell
 # my_workbook workflow已建立
 $ mistral workflow-list | grep 'my_workbook'
 | 86b558a0-3484-4fe3-9408-397824d2706f | my_workbook.local_workflow2 |           | aeee8a0d64ba46a78b5664b994d8a16d | <none> |                              | 2019-07-26 08:34:40 | None       |
@@ -402,7 +402,7 @@ $ mistral action-list | grep 'my_workbook'
 | 1d3c7f6e-8085-438a-bec1-78f202df5fc8 | my_workbook.local_Ad_hoc_action                                           | False     | str1, str2                   | None                         | <none> | 2019-07-26 08:34:40 | None       |
 ```
 > 測試my_workbook.local_workflow1
-```s
+```shell
 $ mistral execution-create my_workbook.local_workflow1
 +--------------------+--------------------------------------+
 | Field              | Value                                |
@@ -434,7 +434,7 @@ $ mistral task-get-result e899976d-b825-495d-ba4d-c7c05982f8ed
 "local_workflow1 complete"
 ```
 > 執行reverse需建立目標任務
-```s
+```shell
 $ vim task_name.json
 
 {
@@ -442,7 +442,7 @@ $ vim task_name.json
 }
 ```
 > 執行my_workbook.local_workflow2
-```s
+```shell
 $ mistral execution-create my_workbook.local_workflow2 {} task_name.json 
 +--------------------+--------------------------------------+
 | Field              | Value                                |

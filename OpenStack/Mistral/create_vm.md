@@ -1,6 +1,6 @@
 # Create VM
 1. 編輯workflow file
-```s
+```yaml
 $ vim create_vm.yaml
 
 ---
@@ -34,11 +34,11 @@ create_vm:
         vm_status: "{{ task().result.status }}"
 ```
 2. 建立workflow
-```s
+```shell
 $ mistral workflow-create create_vm.yaml 
 ```
 3. 查詢OpenStack image ID、flavor ID
-```s
+```shell
 $ openstack image list
 +--------------------------------------+--------+--------+
 | ID                                   | Name   | Status |
@@ -53,7 +53,7 @@ $ flavor list
 +--------------------------------------+------+------+------+-----------+-------+-----------+
 ```
 4. 執行workflow
-```s
+```shell
 $  mistral execution-create create_vm '{"vm_name":"test","image_ref":"d65d28af-e736-460f-a1a4-468d6f5b194e","flavor_ref":"2ab4ce77-41a0-4e16-a9d8-1e069e9b0f4f"}'
 +--------------------+--------------------------------------+
 | Field              | Value                                |
@@ -71,7 +71,7 @@ $  mistral execution-create create_vm '{"vm_name":"test","image_ref":"d65d28af-e
 +--------------------+--------------------------------------+
 ```
 5. 查看execution執行結果
-```s
+```shell
 $ mistral execution-list
 +--------------------------------------+--------------------------------------+---------------+--------------------+-------------+-------------------+---------+------------+---------------------+---------------------+
 | ID                                   | Workflow ID                          | Workflow name | Workflow namespace | Description | Task Execution ID | State   | State info | Created at          | Updated at          |
@@ -80,7 +80,7 @@ $ mistral execution-list
 +--------------------------------------+--------------------------------------+---------------+--------------------+-------------+-------------------+---------+------------+---------------------+---------------------+
 ```
 6. 查看task執行結果
-```s
+```shell
 $ mistral task-list 8f8f8455-2184-401d-a764-a844a50c9c67
 +--------------------------------------+-------------------+---------------+--------------------+--------------------------------------+---------+------------+---------------------+---------------------+
 | ID                                   | Name              | Workflow name | Workflow namespace | Execution ID                         | State   | State info | Created at          | Updated at          |
@@ -90,7 +90,7 @@ $ mistral task-list 8f8f8455-2184-401d-a764-a844a50c9c67
 +--------------------------------------+-------------------+---------------+--------------------+--------------------------------------+---------+------------+---------------------+---------------------+
 ```
 7. 查看task result
-```s
+```shell
 $ mistral task-get-result 293d4f57-25eb-45b1-bafe-1998a8a61d2e
 {
     "OS-EXT-STS:task_state": "scheduling", 
