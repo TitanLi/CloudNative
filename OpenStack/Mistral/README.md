@@ -45,7 +45,7 @@
   - [查看單一action執行結果](#查看單一action執行結果)
 * [進階使用](#進階使用)
   - [ad-hoc-actions](#ad-hoc-actions)
-* [可以透過運行來更改此設置](#可以透過運行來更改此設置)
+* [可以透過運行來更改Mistral設置](#可以透過運行來Mistral改此設置)
 * [問題解決](#問題解決)
   - [E: Sub-process /usr/bin/dpkg returned an error code (1)](#e-sub-process-usrbindpkg-returned-an-error-code-1)
 
@@ -872,7 +872,7 @@ $ mistral task-get-result 4fddb7cb-3931-4a7b-a898-371e994ef8ee
 ```
 
 
-## 可以透過運行來更改此設置
+## 可以透過運行來更改Mistral設置
 ```
 $ dpkg-reconfigure -plow mistral-common
 ```
