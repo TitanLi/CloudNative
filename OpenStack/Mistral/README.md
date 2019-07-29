@@ -1,14 +1,63 @@
 # Mistral
 [安裝教學](https://cao0507.github.io/2017/12/23/Openstack%E7%8E%AF%E5%A2%83%E4%B8%8B%E6%89%8B%E5%8A%A8%E5%AE%89%E8%A3%85Mistral/)
+
 [Welcome to the Mistral documentation](https://docs.openstack.org/mistral/latest/)
 
-## 安裝必要元件
+----
+
+## Table of Contents
+* [安裝Mistral](#安裝Mistral)
+  - [安裝必要元件](#安裝必要元件)
+  - [安裝Mistral server](#安裝Mistral-server)
+  - [產生配置文件](#產生配置文件)
+  - [建立Mistral及logs目錄](#建立Mistral及logs目錄)
+  - [複製配置文件](#複製配置文件)
+  - [建立mistral使用者](#建立mistral使用者)
+  - [建立資料庫](#建立資料庫)
+  - [建立service和endpoint](#建立service和endpoint)
+  - [修改配置文件](#修改配置文件)
+  - [初始化資料庫](#初始化資料庫)
+  - [安裝Mistral client](#安裝Mistral-client)
+  - [安装Mistral horizon](#安装Mistral-horizon)
+  - [重啟apache2](#重啟apache2)
+  - [運行Mistral server](#運行Mistral-server)
+  - [測試Mistral CLI](#測試Mistral-CLI)
+  - [Mistral Service狀態監控](#Mistral-Service狀態監控)
+* [技巧](#技巧)
+  - [常用指令](#常用指令)
+  - [others action](#Others-action)
+  - [workflow template](#workflow-template)
+  - [task policies](#task-policies)
+  - [task input](#task-input)
+  - [task publish](#task-publish)
+  - [multi-with-items](#multi-with-items)
+  - [變數取用](#變數取用)
+  - [刪除技巧](#刪除技巧)
+  - [尋找ERROR](#尋找ERROR)
+* [開始使用](#開始使用)
+  - [執行順序](#執行順序)
+  - [建立workflow(建立任務模板)](#建立workflow建立任務模板)
+  - [執行以創建好的workflow](#執行以創建好的workflow)
+  - [查看整個workflow執行狀態](#查看整個workflow執行狀態)
+  - [查看task執行狀態](#查看task執行狀態)
+  - [查看task執行結果即stdecho](#查看task執行結果即stdecho)
+  - [查看action執行狀態](#查看action執行狀態)
+  - [查看單一action執行結果](#查看單一action執行結果)
+* [進階使用](#進階使用)
+ - [ad-hoc-actions](#ad-hoc-actions)
+* [可以透過運行來更改此設置](#可以透過運行來更改此設置)
+* [問題解決](#問題解決)
+  - [E: Sub-process /usr/bin/dpkg returned an error code (1)](#e-sub-process-usrbindpkg-returned-an-error-code-1)
+
+----
+## 安裝Mistral
+### 安裝必要元件
 ```
 $ apt-get install python-dev python-setuptools python-pip libffi-dev \
   libxslt1-dev libxml2-dev libyaml-dev libssl-dev
 ```
 
-## 安裝Mistral server
+### 安裝Mistral server
 ```
 $ git clone https://github.com/openstack/mistral.git
 $ cd mistral
@@ -17,22 +66,22 @@ $ pip install -r requirements.txt
 $ python setup.py install
 ```
 
-## 產生配置文件
+### 產生配置文件
 ```
 $ oslo-config-generator --config-file tools/config/config-generator.mistral.conf --output-file etc/mistral.conf
 ```
 
-## 建立Mistral及logs目錄
+### 建立Mistral及logs目錄
 ```
 $ mkdir -p /etc/mistral /var/log/mistral
 ```
 
-## 複製配置文件
+### 複製配置文件
 ```
 $ cp etc/* /etc/mistral/
 ```
 
-## 建立mistral使用者
+### 建立mistral使用者
 ```
 $ openstack user create --domain default --password-prompt mistral
 User Password:MISTRAL_PASS
@@ -41,7 +90,7 @@ Repeat User Password:MISTRAL_PASS
 $ openstack role add --project service --user mistral admin
 ```
 
-## 建立資料庫
+### 建立資料庫
 ```
 $ mysql
 MariaDB [(none)]> CREATE DATABASE mistral;
@@ -51,7 +100,7 @@ MariaDB [mistral]> flush privileges;
 MariaDB [mistral]> exit;
 ```
 
-## 建立service和endpoint
+### 建立service和endpoint
 ```
 $ openstack service create --name mistral --description "Openstack Workflow service" workflow
 $ openstack endpoint create --region RegionOne workflow public http://controller:8989/v2
@@ -59,7 +108,7 @@ $ openstack endpoint create --region RegionOne workflow internal http://controll
 $ openstack endpoint create --region RegionOne workflow admin http://controller:8989/v2
 ```
 
-## 修改配置文件
+### 修改配置文件
 ```
 $ vim /etc/mistral/mistral.conf 
 [DEFAULT]
@@ -80,18 +129,18 @@ username = mistral
 password = MISTRAL_PASS
 ```
 
-## 初始化資料庫
+### 初始化資料庫
 ```
 $ mistral-db-manage --config-file /etc/mistral/mistral.conf upgrade head
 $ mistral-db-manage --config-file /etc/mistral/mistral.conf populate
 ```
 
-## 安裝Mistral client
+### 安裝Mistral client
 ```
 $ pip install python-mistralclient
 ```
 
-## 安装Mistral horizon
+### 安装Mistral horizon
 ```
 $ git clone https://git.openstack.org/openstack/mistral-dashboard.git -b stable/queens
 $ cd mistral-dashboard/
@@ -100,13 +149,13 @@ $ python setup.py install
 $ cp -b mistraldashboard/enabled/_50_mistral.py /usr/share/openstack-dashboard/openstack_dashboard/enabled/_50_mistral.py
 ```
 
-## 重啟apache2
+### 重啟apache2
 ```
 $ service apache2 restart
 ```
 ！[Mistral horizon](https://i.imgur.com/3ujmzUI.png)
 
-## 運行Mistral server
+### 運行Mistral server
 ```
 $ python mistral/mistral/cmd/launch.py --server all --config-file /etc/mistral/mistral.conf
 
@@ -125,13 +174,13 @@ $ mistral-server --server executor --config-file /etc/mistral/mistral.conf
 $ mistral-server --server api,engine --config-file <path-to-mistral.conf>
 ```
 
-## 測試Mistral CLI
+### 測試Mistral CLI
 ```
 $ mistral workbook-list
 $ mistral action-list
 ```
 
-## Mistral Service狀態監控
+### Mistral Service狀態監控
 > 透過tooz coordinator的member管理實現的，當成是啟動時，會自動註冊member，程式壞掉或退出時，會從member中移除，由此判斷該服務是否運行，coordinator的backend可以是zookeeper、redis、memcached等，這裡選用memcached
 ```
 $ vim /etc/mistral/mistral.conf
@@ -206,7 +255,7 @@ $ mistral action-execution-list {task-list_ID}
 # 查看task單一action輸出結果
 $ mistral action-execution-get-output {action-execution-list_ID}
 ```
-### Others action
+### others action
 ```
 std.async_noop
 std.echo
@@ -482,7 +531,7 @@ $ mistral task-get-result 45527527-19be-49aa-a4f7-3696fd4b110a
 $ mistral task-get-result f3fed629-8d7d-4ddc-9071-dbb34411eb09
 "local_workflow2 complete"
 ```
-### Task policies
+### task policies
 ```yaml
 my_task:
   action: my_action
