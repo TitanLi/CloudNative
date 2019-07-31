@@ -1,0 +1,26 @@
+---
+version: '2.0'
+name: std-js-workbook
+
+workflows:
+  generate_uuid:
+    description: Generates a Universal Unique ID
+  
+    input:
+      - radix: 16
+  
+    output:
+      uuid: <% $.generated_uuid %>
+  
+    tasks:
+      generate_uuid_task:
+        action: std.js
+        input:
+          context: <% $ %>
+          script: |
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r&0x3|0x8);
+                    return v.toString($.radix);
+            });
+        publish:
+          generated_uuid: <% task().result %>

@@ -1,0 +1,20 @@
+version: '2.0'
+
+name: neutron-workbook
+
+description: neutron
+
+workflows:
+  list_floatingips:
+    type: direct
+    tasks:
+      list_floatingips:
+        action: neutron.list_floatingips
+
+  list_subnets:
+    type: direct
+    tasks:
+      list_subnets:
+        action: neutron.list_subnets
+        publish:
+           result: <% task().result %>

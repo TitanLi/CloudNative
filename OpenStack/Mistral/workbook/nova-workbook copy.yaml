@@ -1,0 +1,49 @@
+---
+version: '2.0'
+name: nova-workbook
+
+workflows:
+  flavors_list:
+    type: direct
+    tasks:
+      flavors_list:
+        action: nova.flavors_list
+        publish:
+           result: <% task().result %>
+
+  flavors_find:
+    type: direct
+    tasks:
+      flavors_find:
+        action: nova.flavors_find vcpus=4
+        publish:
+           result: <% task().result %>
+
+#   ---
+# version: '2.0'
+# name: nova-workbook
+
+# workflows:
+#   flavors_list:
+#     type: direct
+#     tasks:
+#       flavors_list:
+#         action: nova.flavors_list
+#         publish:
+#            result: <% task().result %>
+
+#   flavors_find:
+#     type: direct
+#     tasks:
+#       flavors_list:
+#         action: nova.flavors_find name='test11' ram=4096 disk=100 vcpus=4
+#         publish:
+#            result: <% task().result %>
+
+#   # flavors_create:
+#   #   type: direct
+#   #   tasks:
+#   #     flavors_create:
+#   #       action: nova.flavors_create name='test' ram=4096 disk=100 vcpus=4
+#   #       publish:
+#   #          result: <% task().result %>

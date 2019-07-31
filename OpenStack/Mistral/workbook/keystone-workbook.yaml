@@ -1,0 +1,12 @@
+---
+version: '2.0'
+name: keystone-workbook
+
+workflows:
+  projects_list:
+    type: direct
+    tasks:
+      projects_list:
+        action: keystone.projects_list
+        publish:
+           result: <% task().result %>

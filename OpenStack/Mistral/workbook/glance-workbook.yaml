@@ -1,0 +1,12 @@
+---
+version: '2.0'
+name: glance-workbook
+
+workflows:
+  images_list:
+    type: direct
+    tasks:
+      images_list:
+        action: glance.images_list
+        publish:
+           result: <% task().result %>
