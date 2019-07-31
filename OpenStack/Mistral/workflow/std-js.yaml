@@ -1,0 +1,18 @@
+---
+version: '2.0'
+
+get_date_workflow:
+  description: Get the current date
+
+  output:
+    current_date: <% $.current_date %>
+
+  tasks:
+    get_date_task:
+      action: std.js
+      input:
+        script: |
+          var date = new Date();
+          return date; // returns "2015-07-12T10:32:12.460000" or use date.toLocaleDateString() for "Sunday, July 12, 2015"
+      publish:
+        current_date: <% task().result %>

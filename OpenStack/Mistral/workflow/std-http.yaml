@@ -1,0 +1,10 @@
+---
+version: '2.0'
+
+std-http:
+  tasks:
+    std-http:
+      action: std.http
+      input:
+        url: https://github.com/TitanLi/CloudNative/tree/master/OpenStack/Mistral
+        method: GET

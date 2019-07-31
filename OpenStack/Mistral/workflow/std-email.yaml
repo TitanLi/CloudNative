@@ -1,0 +1,15 @@
+---
+version: '2.0'
+std_email_wf:
+  tasks:
+    send_email_task:
+      action: std.email
+      input:
+        from_addr: nutc.iot@gmail.com
+        to_addrs: [Lisheng0706@gmail.com]
+        subject: Hello from Mistral :)
+        body: |
+          Cheers! (:_:)
+          -- Thanks, Mistral Team.
+        smtp_server: smtp.gmail.com:587
+        smtp_password: FROM_ADDR_EMAIL_PASSWORD

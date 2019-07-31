@@ -118,8 +118,8 @@ transport_url = rabbit://openstack:RABBIT_PASS@controller
 connection = mysql+pymysql://mistral:openstack@controller/mistral
 
 [keystone_authtoken]
-auth_uri = http://controller:5000
-auth_url = http://controller:5000
+auth_uri = http://controller:5000/v3
+auth_url = http://controller:5000/v3
 memcached_servers = controller:11211
 auth_type = password
 project_domain_name = Default
@@ -201,6 +201,28 @@ $ mistral service-list
 +--------------+----------------+
 ```
 
+### std.javascript
+安裝py_mini_racer
+```
+$ pip install py_mini_racer
+```
+安裝v8
+```
+$ sudo pip install -v pyv8
+或
+$ sudo apt-get install libboost-all-dev
+$ sudo git clone https://github.com/buffer/pyv8.git
+$ cd pyv8
+$ sudo apt-get install build-essential autoconf libtool pkg-config python-opengl python-imaging python-pyrex python-pyside.qtopengl idle-python2.7 qt4-dev-tools qt4-designer libqtgui4 libqtcore4 libqt4-xml libqt4-test libqt4-script libqt4-network libqt4-dbus python-qt4 python-qt4-gl libgle3 python-dev
+$ python setup.py build
+$ sudo python setup.py install
+```
+編輯Misrtal配置文件
+```
+$ vim /etc/mistral/mistral.conf
+[DEFAULT]
+js_implementation = pyv8
+```
 ## 技巧
 [https://blog.csdn.net/tpiperatgod/article/details/56282219](https://blog.csdn.net/tpiperatgod/article/details/56282219)
 [語法教學](https://docs.openstack.org/mistral/latest/user/wf_lang_v2.html)
@@ -318,8 +340,8 @@ my_workflow:
         delay: 5
         count: 15
 ```
-> action、on-success、on-error、on-complete可理解為
-```
+> action的on-success、on-error、on-complete可理解為
+```yaml
 try:
     action
     on-success
@@ -328,9 +350,46 @@ except:
 finally:
     on-complete
 ```
+> on-success、on-error、on-complete也可自行給定狀態
+```yaml
+# 將workflow狀態設為fail，只執行taskA
+on-complete:
+  - taskA
+  - fail
+  - taskB
+
+# 暫停workflow，會先執行taskA等待手動恢復workflow將會執行taskB
+on-complete:
+  - taskA
+  - pause
+  - taskB
+
+# example
+---
+version: '2.0'
+
+send_error_mail:
+  tasks:
+    create_server:
+      action: nova.servers_create name=<% $.vm_name %>
+      publish:
+        vm_id: <% task().result.id %>
+      on-complete:
+      # 如果vm_id值為空，則它將使工作流失敗
+        - fail: <% not $.vm_id %>
+```
+> fork
+>> 將同時運行register_vm_in_load_balancer、register_vm_in_dns
+```yaml
+create_vm:
+  ...
+  on-success:
+    - register_vm_in_load_balancer
+    - register_vm_in_dns
+```
 > 並行使用
 >> join:all表示需等待所有task完成，也可以設置為1或one，至樣就只需等待任一一個task執行結束即可
-```
+```yaml
 tasks:
   A:
     action: action.x
@@ -350,7 +409,7 @@ tasks:
 > 此task是屬於反向依賴，意思是執行A，如果A宣告依賴於B、C，則需要先執行B、C
 >> 可使用requires
 >> 需注意Reverse Workflow不能使用on-success、on-error以及on-complete指令
-```
+```yaml
 tasks:
   A:
     action: action.x
@@ -369,7 +428,7 @@ $ vim task_name.json
 }
 ```
 > 執行方式
-```
+```shell
 $ mistral execution-create REVERSE-WORKFLOW-NAME {} task_name.json 
 ```
 3. task有兩種寫法
@@ -392,6 +451,7 @@ $ vim my_workbook.yaml
 
 version: '2.0'
 
+# 需與檔名相同
 name: my_workbook
 
 description: My set of workflows and ad-hoc actions
@@ -665,10 +725,16 @@ with-items:
 $ mistral execution-delete $(mistral execution-list | awk '{print $2}')
 # 刪除execution status ERROR
 $ mistral execution-delete $(mistral execution-list | grep 'ERROR' | awk '{print $2}')
-# 刪除workflow
+# 刪除所有workflow
+$ mistral workflow-delete $(mistral workflow-list |  awk '{print $2}')
+# 刪除所有action
+$ mistral action-delete $(mistral action-list | awk '{print $2}')
+# 刪除workflow in my_workbook
 $ mistral workflow-delete $(mistral workflow-list | grep 'my_workbook' | awk '{print $2}')
-# 刪除action
+# 刪除action in my_workbook
 $ mistral action-delete $(mistral action-list | grep 'my_workbook' | awk '{print $2}')
+# 刪除workbook
+$ mistral workbook-delete $(mistral workbook-list | awk '{print $2}')
 ```
 ### 尋找ERROR
 ```
@@ -888,4 +954,14 @@ $ sudo apt-get update
 $ apt-get -f install vim
 $ sudo mv /var/lib/dpkg/info/* /var/lib/dpkg/info.bak
 $ sudo rm -rf /var/lib/dpkg/info
+```
+### E: Sub-process /usr/bin/dpkg returned an error code (2)
+```
+$ sudo mv /var/lib/dpkg/info /var/lib/dpkg/info.bak
+$ sudo mkdir /var/lib/dpkg/info
+$ sudo apt-get update
+```
+### ERROR (app)
+```
+$ . admin-openrc
 ```
