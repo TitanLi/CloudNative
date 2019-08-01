@@ -59,6 +59,6 @@ $ git remote set-url gerrit https://<username>:<http-password>@review.opendev.or
 ```shell
 $ git checkout -b bug/manual
 $ vim doc/source/installation/manual.rst
-$ git commit
+$ git commit -a
 $ git review
 ```
