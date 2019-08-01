@@ -23,6 +23,7 @@
   - [運行Mistral server](#運行Mistral-server)
   - [測試Mistral CLI](#測試Mistral-CLI)
   - [Mistral Service狀態監控](#Mistral-Service狀態監控)
+  - [安裝std.javascript環境](#std.javascript)
 * [技巧](#技巧)
   - [常用指令](#常用指令)
   - [others action](#Others-action)
@@ -48,6 +49,8 @@
 * [可以透過運行來更改mistral設置](#可以透過運行來更改mistral設置)
 * [問題解決](#問題解決)
   - [E: Sub-process /usr/bin/dpkg returned an error code (1)](#e-sub-process-usrbindpkg-returned-an-error-code-1)
+  - [E: Sub-process /usr/bin/dpkg returned an error code (2)](#e-sub-process-usrbindpkg-returned-an-error-code-2)
+  - [ERROR (app)](#error-app)
 
 ----
 ## 安裝Mistral
@@ -459,7 +462,8 @@ description: My set of workflows and ad-hoc actions
 workflows:
   local_workflow1:
     type: direct
-
+    output:
+      workflow_data: <% $.workflow_data %>
     tasks:
       task1:
         action: local_Ad_hoc_action str1='Hi' str2='Titan'
@@ -468,7 +472,8 @@ workflows:
 
       task2:
         action: std.echo output='local_workflow1 complete'
-
+        publish:
+          workflow_data: <% task().result %>
   local_workflow2:
     type: reverse
 
@@ -477,7 +482,7 @@ workflows:
         workflow: local_workflow1
 
       task2:
-        action: std.echo output='local_workflow2 complete'
+        action: std.echo output=<% task(task1).result.workflow_data %>
         requires: [task1]
 
 actions:
