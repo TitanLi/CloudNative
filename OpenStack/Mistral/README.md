@@ -23,7 +23,7 @@
   - [運行Mistral server](#運行Mistral-server)
   - [測試Mistral CLI](#測試Mistral-CLI)
   - [Mistral Service狀態監控](#Mistral-Service狀態監控)
-  - [安裝std.javascript環境](#std.javascript)
+  - [安裝std.javascript環境](#stdjavascript)
 * [技巧](#技巧)
   - [常用指令](#常用指令)
   - [others action](#Others-action)
