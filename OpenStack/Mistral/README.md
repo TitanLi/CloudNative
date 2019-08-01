@@ -228,6 +228,7 @@ js_implementation = pyv8
 ```
 ## 技巧
 [https://blog.csdn.net/tpiperatgod/article/details/56282219](https://blog.csdn.net/tpiperatgod/article/details/56282219)
+
 [語法教學](https://docs.openstack.org/mistral/latest/user/wf_lang_v2.html)
 ### 常用指令
 #### action

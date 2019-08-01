@@ -1,0 +1,208 @@
+---
+version: '2.0'
+
+name: create-vm-demo1
+
+workflows:
+# mistral execution-create create-vm-demo1.find_image_wf '{"image_name":"ubuntu"}'
+  find_image_wf:
+    type: direct
+    input:
+      - image_name
+
+    output:
+      workflow_data: <% $.workflow_data %>
+
+    tasks:
+      images_list:
+        action: glance.images_list
+        publish:
+          image_results: <% task(images_list).result %>
+        on-success: find_image
+      
+      find_image:
+        action: std.js
+        input:
+          context: <% $ %>
+          script: |
+            for(var i in $.image_results){
+              if($.image_results[i].name == $.image_name){
+                return $.image_results[i].id
+              };
+            }
+            return null
+        publish:
+          image_id: <% task(find_image).result %>
+        on-success: 
+          - image_not_find: <% task(find_image).result = null %>
+          - fail: <% task(find_image).result = null %>
+          - image_exist
+
+      image_exist:
+        action: std.echo output=<% $.image_id %>
+        publish:
+          workflow_data: <% task().result %>
+
+      image_not_find:
+        workflow: fail_email_wf error_message='Not find image'
+
+# mistral execution-create create-vm-demo1.find_flavor_wf '{"flavor_name":"test","flavor_ram":4096,"flavor_disk":100,"flavor_vcpus":4}'
+  find_flavor_wf:
+    type: direct
+    description: find flavor workflow
+
+    input:
+      - flavor_name
+      - flavor_ram
+      - flavor_vcpus
+      - flavor_disk
+
+    output:
+      workflow_data: <% $.workflow_data %>
+
+    tasks:
+      flavors_list:
+        action: nova.flavors_list
+        publish:
+          flavors_result: <% task().result %>
+        on-success:
+          - find_flavors
+    
+      find_flavors:
+        action: std.js
+        input:
+          context: <% $ %>
+          script: |
+            for(var i in $.flavors_result){
+              if($.flavors_result[i].name == $.flavor_name){
+                if($.flavors_result[i].ram == $.flavor_ram && $.flavors_result[i].vcpus == $.flavor_vcpus && $.flavors_result[i].disk == $.flavor_disk){
+                  return $.flavors_result[i].id
+                }else{
+                  return 'conflict_flavor_name'
+                }
+              }
+            }
+            return null
+        publish:
+          flavors_id: <% task(find_flavors).result %>
+        on-success:
+          - create_flavor: <% task(find_flavors).result = null %>
+          - find_flavor_success: <% task(find_flavors).result != null %>
+      find_flavor_success:
+        action: std.echo output=<% $.flavors_id %>
+        publish:
+          workflow_data: <% task().result %>
+      
+      create_flavor:
+        action: nova.flavors_create name=<% $.flavor_name %> ram=<% $.flavor_ram %> disk=<% $.flavor_disk %> vcpus=<% $.flavor_vcpus %>
+        publish:
+          workflow_data: <% task(create_flavor).result.id %>
+
+# mistral execution-create create-vm-demo1.check_resource_wf '{"image_name":"test","flavor_name":"test","flavor_ram":4096,"flavor_disk":100,"flavor_vcpus":4}'
+  check_resource_wf:
+    type: direct
+    description: create vm workflow example
+
+    input:
+      - image_name
+      - flavor_name
+      - flavor_ram
+      - flavor_vcpus
+      - flavor_disk
+
+    output:
+      image_id: <% $.image_id %>
+      flavors_id: <% $.flavors_id %>
+
+    tasks:
+      find_image:
+        workflow: find_image_wf image_name=<% $.image_name %>
+        on-success: check_resource
+
+      find_flavor:
+        workflow: find_flavor_wf flavor_name=<% $.flavor_name %> flavor_ram=<% $.flavor_ram %> flavor_vcpus=<% $.flavor_vcpus %> flavor_disk=<% $.flavor_disk %>
+        on-success: check_resource
+
+      check_resource:
+        join: all
+        action: std.echo output=<% task(find_image).result.workflow_data %>
+        publish:
+          image_id: <% task(find_image).result.workflow_data %>
+          flavors_id: <% task(find_flavor).result.workflow_data %>
+
+# mistral execution-create create-vm-demo1.create_vm_wf '{"key_name":"Titan","vm_name":"test","image_name":"test","flavor_name":"test","flavor_ram":4096,"flavor_disk":100,"flavor_vcpus":4}'
+  create_vm_wf:
+    type: direct
+    description: Simple workflow example
+
+    input:
+      - key_name
+      - vm_name
+      - image_name
+      - flavor_name
+      - flavor_ram
+      - flavor_vcpus
+      - flavor_disk
+      
+    output:
+      vm_id: "{{ _.vm_id }}"
+      vm_status: <% $.vm_status %>
+
+    tasks:
+      find_resource:
+        workflow: check_resource_wf image_name=<% $.image_name %> flavor_name=<% $.flavor_name %> flavor_ram=<% $.flavor_ram %> flavor_vcpus=<% $.flavor_vcpus %> flavor_disk=<% $.flavor_disk %>
+        on-success:
+          - create_server
+
+      create_server:
+        action: nova.servers_create key_name=<% $.key_name %> name=<% $.vm_name %> image=<% task(find_resource).result.image_id %> flavor=<% task(find_resource).result.flavors_id %>
+        publish:
+          vm_id: <% task().result.id %>
+        on-success:
+          - wait_for_instance
+        on-error:
+          - create_vm_fail
+
+      wait_for_instance:
+        action: nova.servers_find id={{ _.vm_id }} status='ACTIVE'
+        retry:
+          delay: 5
+          count: 15
+        on-success:
+          - create_vm_success
+        on-error:
+          - create_vm_fail
+          
+      create_vm_success:
+        workflow: success_email_wf name=<% $.vm_name %> status=<% task(wait_for_instance).result.status %>
+
+      create_vm_fail:
+        workflow: fail_email_wf error_message='VM <% $.vm_name %> create fail'
+
+  
+  success_email_wf:
+    type: direct
+    description: Simple workflow example
+
+    input:
+      - name
+      - status
+    tasks:
+      success_send_email:
+        action: std.http
+        input:
+          url: 'http://10.0.1.97:3001/success/?message=VM name:<% $.name %> <br> status:<% $.status %>'
+          method: GET
+
+  fail_email_wf:
+    type: direct
+    description: Simple workflow example
+
+    input:
+      - error_message
+    tasks:
+      fail_send_email:
+        action: std.http
+        input:
+          url: 'http://10.0.1.97:3001/fail/?message=Error:<% $.error_message%>'
+          method: GET
