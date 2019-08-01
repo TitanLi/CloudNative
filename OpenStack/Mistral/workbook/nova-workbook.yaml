@@ -18,3 +18,12 @@ workflows:
         action: nova.flavors_create name='apple' ram=4096 disk=100 vcpus=4
         publish:
            result: <% task().result %>
+
+  flavors_find:
+    tasks:
+      flavors_find:
+        action: nova.flavors_find
+        input:
+          name: test
+        publish:
+           result: <% task().result %>
