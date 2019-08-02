@@ -85,18 +85,18 @@ $ git review
 
 (5) 按Post送出
 
-![recheck](https://imgur.com/fxuvW2B)
+![recheck](https://i.imgur.com/fxuvW2B.png)
 
 (6) 查看驗證過程
 
 [https://zuul.openstack.org/status](https://zuul.openstack.org/status)
 
-![zuul1](https://imgur.com/DBLl4i2)
+![zuul1](https://i.imgur.com/DBLl4i2.png)
 
 (7) 可輸入Project名稱查詢驗證狀態
 
-![zuul2](https://imgur.com/sqtGGhJ)
+![zuul2](https://i.imgur.com/sqtGGhJ.png)
 
 (8) successfully merged
 
-![successfully merged](https://imgur.com/6gMnuVw)
+![successfully merged](https://i.imgur.com/6gMnuVw.png)
