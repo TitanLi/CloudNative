@@ -46,6 +46,7 @@ $ git pull
 ```
 
 8. git remote
+username、http-password取得[https://review.opendev.org/#/settings/](https://review.opendev.org/#/settings/)
 - 第一次：
 ```shell
 $ git remote add gerrit https://<username>:<http-password>@review.opendev.org/openstack/kuryr-kubernetes.git
@@ -64,8 +65,38 @@ $ git review
 ```
 
 10. 重新提交review
-> 如果jenkins回報了failure，可以查看Logs除錯。如果確認不是自己的patch導致，可以在comment上留言recheck no bug，重新再跑 Test。
 ```shell
 $ git commit -a --amend
 $ git review
 ```
+
+11. recheck
+> 如果jenkins回報了failure，可以查看Logs除錯
+
+> 如果確認不是自己的patch導致，可以在comment上留言recheck，重新再跑 Test
+
+(1) 點選Reply
+
+(2) 輸入"recheck"
+
+(3) Code-Review選擇0
+
+(4) Workflow選擇0
+
+(5) 按Post送出
+
+![recheck](https://imgur.com/fxuvW2B)
+
+(6) 查看驗證過程
+
+[https://zuul.openstack.org/status](https://zuul.openstack.org/status)
+
+![zuul1](https://imgur.com/DBLl4i2)
+
+(7) 可輸入Project名稱查詢驗證狀態
+
+![zuul2](https://imgur.com/sqtGGhJ)
+
+(8) successfully merged
+
+![successfully merged](https://imgur.com/6gMnuVw)
