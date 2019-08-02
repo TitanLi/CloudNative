@@ -62,3 +62,10 @@ $ vim doc/source/installation/manual.rst
 $ git commit -a
 $ git review
 ```
+
+10. 重新提交review
+> 如果jenkins回報了failure，可以查看Logs除錯。如果確認不是自己的patch導致，可以在comment上留言recheck no bug，重新再跑 Test。
+```shell
+$ git commit -a --amend
+$ git review
+```
