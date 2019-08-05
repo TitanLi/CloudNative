@@ -258,11 +258,14 @@ $ mistral workflow-delete {workflow_name}
 ```
 #### execution
 ```
+# 執行workflow可執行mistral execution-create {workflow_name} '參數(key-value)'
+$ mistral execution-create hello_Ad_hoc_workflow '{"name": "Titan"}'
+
 # 查看所有workflow執行結果
 $ mistral execution-list
 
-# 執行workflow可執行mistral execution-create {workflow_name} '參數(key-value)'
-$ mistral execution-create hello_Ad_hoc_workflow '{"name": "Titan"}'
+# 查看execution輸出結果
+$ mistral execution-get-output {execution-create_ID}
 
 # 刪除execution
 $ mistral execution-delete {execution-create_ID}

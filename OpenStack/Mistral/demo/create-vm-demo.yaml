@@ -4,28 +4,191 @@ version: '2.0'
 name: create-vm-demo
 
 workflows:
+  # mistral execution-create create-vm-demo.find_image_wf '{"image_name":"ubuntu"}'
+  # 用來尋找OpenStack image是否存在，存在就會輸出image ID，不存在將會發email通知image不存在
+  find_image_wf:
+    type: direct
+    description: Find image workflow
+
+    # 輸入image name ex:'{"image_name":"ubuntu"}'
+    input:
+      - image_name
+    # 輸出image_id，可透過mistral execution-get-output查看
+    output:
+      workflow_data: <% $.workflow_data %>
+
+    tasks:
+      # 列出所有image列表
+      images_list:
+        action: glance.images_list
+        publish:
+          image_results: <% task(images_list).result %>
+        on-success: find_image
+      # 尋找符合條件的image
+      find_image:
+        action: std.js
+        input:
+          context: <% $ %>
+          script: |
+            for(var i in $.image_results){
+              if($.image_results[i].name == $.image_name){
+                return $.image_results[i].id
+              };
+            }
+            return null
+        publish:
+          image_id: <% task(find_image).result %>
+        on-success: 
+          - image_not_find: <% task(find_image).result = null %>
+          - fail: <% task(find_image).result = null %>
+          - image_exist
+      # image存在
+      image_exist:
+        action: std.echo output=<% $.image_id %>
+        publish:
+          workflow_data: <% task().result %>
+      # image不存在，並執行fail_email_wf
+      image_not_find:
+        workflow: fail_email_wf error_message='Not find image'
+
+  # mistral execution-create create-vm-demo.find_flavor_wf '{"flavor_name":"test","flavor_ram":4096,"flavor_disk":100,"flavor_vcpus":4}'
+  # 用來尋找是否有符合條件flavor，存在即輸出flavor ID，名字相同大小不同則輸出conflict_flavor_name，不存在則建立新的flavor
+  find_flavor_wf:
+    type: direct
+    description: Find flavor workflow
+
+    # 輸入flavor相關資訊，ex:'{"flavor_name":"test","flavor_ram":4096,"flavor_disk":100,"flavor_vcpus":4}'
+    input:
+      - flavor_name
+      - flavor_ram
+      - flavor_vcpus
+      - flavor_disk
+
+    # 輸出flavors_id，可透過mistral execution-get-output查看
+    output:
+      workflow_data: <% $.workflow_data %>
+
+    tasks:
+      # 找尋所有flavors列表
+      flavors_list:
+        action: nova.flavors_list
+        publish:
+          flavors_result: <% task().result %>
+        on-success:
+          - find_flavors
+      # 找尋符合使用者輸入條件的flavor，若存在回傳flavors_id，若flavor名稱相同規格不符則回傳'conflict_flavor_name'，若，若查無flavor則建立flavor
+      find_flavors:
+        action: std.js
+        input:
+          context: <% $ %>
+          script: |
+            for(var i in $.flavors_result){
+              if($.flavors_result[i].name == $.flavor_name){
+                if($.flavors_result[i].ram == $.flavor_ram && $.flavors_result[i].vcpus == $.flavor_vcpus && $.flavors_result[i].disk == $.flavor_disk){
+                  return $.flavors_result[i].id
+                }else{
+                  return 'conflict_flavor_name'
+                }
+              }
+            }
+            return null
+        publish:
+          flavors_id: <% task(find_flavors).result %>
+        on-success:
+          - create_flavor: <% task(find_flavors).result = null %>
+          - find_flavor_success: <% task(find_flavors).result != null and task(find_flavors).result != 'conflict_flavor_name'%>
+          - conflict_flavor_name: <% task(find_flavors).result = 'conflict_flavor_name' %>
+      # 輸出成功查詢結果
+      find_flavor_success:
+        action: std.echo output=<% $.flavors_id %>
+        publish:
+          workflow_data: <% task(find_flavor_success).result %>
+      # flavor名稱衝突
+      conflict_flavor_name:
+        action: std.echo output=<% $.flavors_id %>
+      # 建立flavor
+      create_flavor:
+        action: nova.flavors_create name=<% $.flavor_name %> ram=<% $.flavor_ram %> disk=<% $.flavor_disk %> vcpus=<% $.flavor_vcpus %>
+        publish:
+          workflow_data: <% task(create_flavor).result.id %>
+
+  # mistral execution-create create-vm-demo.check_resource_wf '{"image_name":"test","flavor_name":"test","flavor_ram":4096,"flavor_disk":100,"flavor_vcpus":4}'
+  # 檢查VM image、flavor是否存在
+  check_resource_wf:
+    type: direct
+    description: Check VM resource workflow example
+
+    # 輸入要檢查的資源資訊，ex:'{"image_name":"test","flavor_name":"test","flavor_ram":4096,"flavor_disk":100,"flavor_vcpus":4}'
+    input:
+      - image_name
+      - flavor_name
+      - flavor_ram
+      - flavor_vcpus
+      - flavor_disk
+
+    # 輸出image_id、flavors_id，可透過mistral execution-get-output查看
+    output:
+      image_id: <% $.image_id %>
+      flavors_id: <% $.flavors_id %>
+
+    tasks:
+      # 執行workflow find_image_wf
+      find_image:
+        workflow: find_image_wf image_name=<% $.image_name %>
+        on-success: check_resource
+      # 執行workflow find_flavor_wf
+      find_flavor:
+        workflow: find_flavor_wf flavor_name=<% $.flavor_name %> flavor_ram=<% $.flavor_ram %> flavor_vcpus=<% $.flavor_vcpus %> flavor_disk=<% $.flavor_disk %>
+        on-success: check_resource
+      # 等待task find_image、find_flavor全部執行完成，輸出image_id、flavors_id
+      check_resource:
+        join: all
+        action: std.echo
+        input:
+          output: |
+            image ID:<% task(find_image).result.workflow_data %>
+            flavor ID:<% task(find_flavor).result.workflow_data %>
+        publish:
+          image_id: <% task(find_image).result.workflow_data %>
+          flavors_id: <% task(find_flavor).result.workflow_data %>
+
+  # mistral execution-create create-vm-demo.create_vm_wf '{"key_name":"Titan","vm_name":"test","image_name":"test","flavor_name":"test","flavor_ram":4096,"flavor_disk":100,"flavor_vcpus":4}'
+  # 建立VM，並寄出email通知建立結果
   create_vm_wf:
     type: direct
-    description: Simple workflow example
+    description: Create VM workflow example
 
+    # 輸入建立VM的資訊，ex:'{"key_name":"Titan","vm_name":"test","image_name":"test","flavor_name":"test","flavor_ram":4096,"flavor_disk":100,"flavor_vcpus":4}'
     input:
+      - key_name
       - vm_name
-      - image_ref
-      - flavor_ref
+      - image_name
+      - flavor_name
+      - flavor_ram
+      - flavor_vcpus
+      - flavor_disk
+
+    # 輸出vm_id、vm_status，可透過mistral execution-get-output查看
     output:
       vm_id: "{{ _.vm_id }}"
       vm_status: <% $.vm_status %>
 
     tasks:
-      create_service:
-        action: nova.servers_create name=<% $.vm_name %> image=<% $.image_ref %> flavor=<% $.flavor_ref %>
+      # 確認使用者定義資源是否正確
+      find_resource:
+        workflow: check_resource_wf image_name=<% $.image_name %> flavor_name=<% $.flavor_name %> flavor_ram=<% $.flavor_ram %> flavor_vcpus=<% $.flavor_vcpus %> flavor_disk=<% $.flavor_disk %>
+        on-success:
+          - create_server
+      # 建立VM
+      create_server:
+        action: nova.servers_create key_name=<% $.key_name %> name=<% $.vm_name %> image=<% task(find_resource).result.image_id %> flavor=<% task(find_resource).result.flavors_id %>
         publish:
           vm_id: <% task().result.id %>
         on-success:
           - wait_for_instance
         on-error:
           - create_vm_fail
-
+      # 等待VM狀態為ACTIVE
       wait_for_instance:
         action: nova.servers_find id={{ _.vm_id }} status='ACTIVE'
         retry:
@@ -35,14 +198,15 @@ workflows:
           - create_vm_success
         on-error:
           - create_vm_fail
-          
+      # 執行workflow success_email_wf
       create_vm_success:
         workflow: success_email_wf name=<% $.vm_name %> status=<% task(wait_for_instance).result.status %>
-
+      # 執行workflow fail_email_wf
       create_vm_fail:
-        workflow: fail_email_wf name=<% $.vm_name %> status='Failed'
+        workflow: fail_email_wf error_message='VM <% $.vm_name %> create fail'
 
-  
+  # mistral execution-create create-vm-demo.success_email_wf '{"name":"test","status":"apple"}'
+  # 當VM建立成功時觸發，寄出email，此處SMTP使用自行撰寫API Server，也可改用Mistral提供的std.email實作
   success_email_wf:
     type: direct
     description: Simple workflow example
@@ -57,16 +221,17 @@ workflows:
           url: 'http://10.0.1.97:3001/success/?message=VM name:<% $.name %> <br> status:<% $.status %>'
           method: GET
 
+  # mistral execution-create create-vm-demo.fail_email_wf '{"error_message":"test"}'
+  # 當image不存在或VM建立失敗時觸發，寄出email，此處SMTP使用自行撰寫API Server，也可改用Mistral提供的std.email實作
   fail_email_wf:
     type: direct
     description: Simple workflow example
 
     input:
-      - name
-      - status
+      - error_message
     tasks:
       fail_send_email:
         action: std.http
         input:
-          url: 'http://10.0.1.97:3001/fail/?message=VM Creation Failed Name:<% $.name %> <br> status:<% $.status %>'
+          url: 'http://10.0.1.97:3001/fail/?message=Error:<% $.error_message%>'
           method: GET
