@@ -7,23 +7,25 @@
 
 ## Table of Contents
 * [安裝Mistral](#安裝Mistral)
-  - [安裝必要元件](#安裝必要元件)
-  - [安裝Mistral server](#安裝Mistral-server)
-  - [產生配置文件](#產生配置文件)
-  - [建立Mistral及logs目錄](#建立Mistral及logs目錄)
-  - [複製配置文件](#複製配置文件)
-  - [建立mistral使用者](#建立mistral使用者)
-  - [建立資料庫](#建立資料庫)
-  - [建立service和endpoint](#建立service和endpoint)
-  - [修改配置文件](#修改配置文件)
-  - [初始化資料庫](#初始化資料庫)
-  - [安裝Mistral client](#安裝Mistral-client)
-  - [安装Mistral horizon](#安装Mistral-horizon)
-  - [重啟apache2](#重啟apache2)
-  - [運行Mistral server](#運行Mistral-server)
-  - [測試Mistral CLI](#測試Mistral-CLI)
-  - [Mistral Service狀態監控](#Mistral-Service狀態監控)
-  - [安裝std.javascript環境](#stdjavascript)
+  - base on OpenStack
+    - [安裝必要元件](#安裝必要元件)
+    - [安裝Mistral server](#安裝Mistral-server)
+    - [產生配置文件](#產生配置文件)
+    - [建立Mistral及logs目錄](#建立Mistral及logs目錄)
+    - [複製配置文件](#複製配置文件)
+    - [建立mistral使用者](#建立mistral使用者)
+    - [建立資料庫](#建立資料庫)
+    - [建立service和endpoint](#建立service和endpoint)
+    - [修改配置文件](#修改配置文件)
+    - [初始化資料庫](#初始化資料庫)
+    - [安裝Mistral client](#安裝Mistral-client)
+    - [安装Mistral horizon](#安装Mistral-horizon)
+    - [重啟apache2](#重啟apache2)
+    - [運行Mistral server](#運行Mistral-server)
+    - [測試Mistral CLI](#測試Mistral-CLI)
+    - [Mistral Service狀態監控](#Mistral-Service狀態監控)
+    - [安裝std.javascript環境](#stdjavascript)
+  - without base on OpenStack
 * [技巧](#技巧)
   - [常用指令](#常用指令)
   - [others action](#Others-action)
@@ -54,13 +56,14 @@
 
 ----
 ## 安裝Mistral
-### 安裝必要元件
+### 1. base on OpenStack
+#### 安裝必要元件
 ```
 $ apt-get install python-dev python-setuptools python-pip libffi-dev \
   libxslt1-dev libxml2-dev libyaml-dev libssl-dev
 ```
 
-### 安裝Mistral server
+#### 安裝Mistral server
 ```
 $ git clone https://github.com/openstack/mistral.git
 $ cd mistral
@@ -69,22 +72,22 @@ $ pip install -r requirements.txt
 $ python setup.py install
 ```
 
-### 產生配置文件
+#### 產生配置文件
 ```
 $ oslo-config-generator --config-file tools/config/config-generator.mistral.conf --output-file etc/mistral.conf
 ```
 
-### 建立Mistral及logs目錄
+#### 建立Mistral及logs目錄
 ```
 $ mkdir -p /etc/mistral /var/log/mistral
 ```
 
-### 複製配置文件
+#### 複製配置文件
 ```
 $ cp etc/* /etc/mistral/
 ```
 
-### 建立mistral使用者
+#### 建立mistral使用者
 ```
 $ openstack user create --domain default --password-prompt mistral
 User Password:MISTRAL_PASS
@@ -93,7 +96,7 @@ Repeat User Password:MISTRAL_PASS
 $ openstack role add --project service --user mistral admin
 ```
 
-### 建立資料庫
+#### 建立資料庫
 ```
 $ mysql
 MariaDB [(none)]> CREATE DATABASE mistral;
@@ -103,7 +106,7 @@ MariaDB [mistral]> flush privileges;
 MariaDB [mistral]> exit;
 ```
 
-### 建立service和endpoint
+#### 建立service和endpoint
 ```
 $ openstack service create --name mistral --description "Openstack Workflow service" workflow
 $ openstack endpoint create --region RegionOne workflow public http://controller:8989/v2
@@ -111,7 +114,7 @@ $ openstack endpoint create --region RegionOne workflow internal http://controll
 $ openstack endpoint create --region RegionOne workflow admin http://controller:8989/v2
 ```
 
-### 修改配置文件
+#### 修改配置文件
 ```
 $ vim /etc/mistral/mistral.conf 
 [DEFAULT]
@@ -132,18 +135,18 @@ username = mistral
 password = MISTRAL_PASS
 ```
 
-### 初始化資料庫
+#### 初始化資料庫
 ```
 $ mistral-db-manage --config-file /etc/mistral/mistral.conf upgrade head
 $ mistral-db-manage --config-file /etc/mistral/mistral.conf populate
 ```
 
-### 安裝Mistral client
+#### 安裝Mistral client
 ```
 $ pip install python-mistralclient
 ```
 
-### 安装Mistral horizon
+#### 安装Mistral horizon
 ```
 $ git clone https://git.openstack.org/openstack/mistral-dashboard.git -b stable/queens
 $ cd mistral-dashboard/
@@ -152,13 +155,13 @@ $ python setup.py install
 $ cp -b mistraldashboard/enabled/_50_mistral.py /usr/share/openstack-dashboard/openstack_dashboard/enabled/_50_mistral.py
 ```
 
-### 重啟apache2
+#### 重啟apache2
 ```
 $ service apache2 restart
 ```
 ！[Mistral horizon](https://i.imgur.com/3ujmzUI.png)
 
-### 運行Mistral server
+#### 運行Mistral server
 ```
 $ python mistral/mistral/cmd/launch.py --server all --config-file /etc/mistral/mistral.conf
 
@@ -177,13 +180,13 @@ $ mistral-server --server executor --config-file /etc/mistral/mistral.conf
 $ mistral-server --server api,engine --config-file <path-to-mistral.conf>
 ```
 
-### 測試Mistral CLI
+#### 測試Mistral CLI
 ```
 $ mistral workbook-list
 $ mistral action-list
 ```
 
-### Mistral Service狀態監控
+#### Mistral Service狀態監控
 > 透過tooz coordinator的member管理實現的，當成是啟動時，會自動註冊member，程式壞掉或退出時，會從member中移除，由此判斷該服務是否運行，coordinator的backend可以是zookeeper、redis、memcached等，這裡選用memcached
 ```
 $ vim /etc/mistral/mistral.conf
@@ -204,7 +207,7 @@ $ mistral service-list
 +--------------+----------------+
 ```
 
-### std.javascript
+#### std.javascript
 安裝py_mini_racer
 ```
 $ pip install py_mini_racer
@@ -225,6 +228,88 @@ $ sudo python setup.py install
 $ vim /etc/mistral/mistral.conf
 [DEFAULT]
 js_implementation = pyv8
+```
+### 2. without base on OpenStack
+#### 安裝mariadb
+```shell
+$ apt install mariadb-server python-pymysql
+$ service mysql restart
+$ mysql_secure_installation
+1. Enter current password for root (enter for none)：輸入root密碼，第一次設定時預設值是空的，所以直接按Enter即可，接著會詢問是否要設定root密碼，輸入「Ｎ」
+
+2. Remove anonymous users? [Y/n]：是否要移除匿名使用者？輸入「N」
+
+3. Disallow root login remotely? [Y/n]：是否要關閉root遠端登入的功能？依自己需求決定，一般基於安全性考量，輸入「N」
+
+4. Remove test database and access to it? [Y/n]：是否要移除測試的資料庫？建議選擇「Y」來移除
+
+5. Reload privilege tables now? [Y/n]：是否要重新載入表格權限？建議選擇「Y」
+
+$ mysql
+MariaDB [(none)]> CREATE DATABASE mistral;
+MariaDB [mistral]> GRANT ALL PRIVILEGES ON mistral.* TO 'mistral'@'localhost' IDENTIFIED BY 'mistral';
+MariaDB [mistral]> GRANT ALL PRIVILEGES ON mistral.* TO 'mistral'@'%' IDENTIFIED BY 'mistral';
+MariaDB [mistral]> flush privileges;
+MariaDB [mistral]> exit;
+```
+#### 安裝Message queue
+```shell
+$ apt install rabbitmq-server
+
+# 建立使用者
+$ rabbitmqctl add_user mistral RABBIT_PASS
+Creating user "mistral" ...
+
+# 允許mistral使用者可進行讀寫訪問
+$ rabbitmqctl set_permissions mistral ".*" ".*" ".*"
+Setting permissions for user "mistral" in vhost "/" ...
+```
+#### 安裝必要元件
+```shell
+$ apt-get install python-dev python-setuptools python-pip libffi-dev   libxslt1-dev libxml2-dev libyaml-dev libssl-dev
+```
+#### 安裝Mistral server
+```shell
+$ git clone https://github.com/openstack/mistral.git
+$ cd mistral
+$ pip install -r requirements.txt
+$ python setup.py install
+```
+#### 產生配置文件
+```shell
+$ oslo-config-generator --config-file tools/config/config-generator.mistral.conf --output-file etc/mistral.conf
+```
+#### 建立Mistral及logs目錄
+```shell
+$ mkdir -p /etc/mistral /var/log/mistral
+```
+#### 複製配置文件
+```shell
+$ cp etc/* /etc/mistral/
+```
+#### 修改配置文件
+```shell
+$ vim /etc/mistral/mistral.conf
+[DEFAULT]
+transport_url = rabbit://mistral:RABBIT_PASS@10.0.1.99
+[database]
+connection = mysql+pymysql://mistral:mistral@10.0.1.99/mistral
+[pecan]
+# disable authentication for the Mistral service
+auth_enable = false
+```
+#### 運行Mistral server
+```shell
+$ mistral-server --server api,engine,executor --config-file /etc/mistral/mistral.conf
+```
+#### 初始化資料庫
+```shell
+$ mistral-db-manage --config-file /etc/mistral/mistral.conf upgrade head
+$ mistral-db-manage --config-file /etc/mistral/mistral.conf populate
+```
+#### 安裝Mistral client
+```shell
+$ pip install python-mistralclient
 ```
 ## 技巧
 [https://blog.csdn.net/tpiperatgod/article/details/56282219](https://blog.csdn.net/tpiperatgod/article/details/56282219)
