@@ -278,7 +278,8 @@ Setting permissions for user "mistral" in vhost "/" ...
 ```
 #### 安裝必要元件
 ```shell
-$ apt-get install python-dev python-setuptools python-pip libffi-dev   libxslt1-dev libxml2-dev libyaml-dev libssl-dev
+$ apt-get install python-dev python-setuptools python-pip libffi-dev \
+  libxslt1-dev libxml2-dev libyaml-dev libssl-dev
 ```
 #### 安裝Mistral server
 ```shell
