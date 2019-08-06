@@ -7,7 +7,7 @@
 
 ## Table of Contents
 * [安裝Mistral](#安裝Mistral)
-  - base on OpenStack
+  - [1.base on OpenStack](#1-base-on-openstack)
     - [安裝必要元件](#安裝必要元件)
     - [安裝Mistral server](#安裝Mistral-server)
     - [產生配置文件](#產生配置文件)
@@ -25,7 +25,19 @@
     - [測試Mistral CLI](#測試Mistral-CLI)
     - [Mistral Service狀態監控](#Mistral-Service狀態監控)
     - [安裝std.javascript環境](#stdjavascript)
-  - without base on OpenStack
+  - [2.without base on OpenStack](#2-without-base-on-openstack)
+    - [安裝mariadb](#安裝mariadb)
+    - [安裝message queue](#安裝message-queue)
+    - [安裝必要元件](#安裝必要元件)
+    - [安裝Mistral server](#安裝mistral-server-1)
+    - [產生配置文件](#產生配置文件-1)
+    - [建立Mistral及logs目錄](#建立mistral及logs目錄-1)
+    - [複製配置文件](#複製配置文件-1)
+    - [修改配置文件](Mistral#修改配置文件-1)
+    - [初始化資料庫](#初始化資料庫-1)
+    - [安裝Mistral client](#安裝mistral-client-1)
+    - [運行Mistral server](#運行mistral-server-1)
+
 * [技巧](#技巧)
   - [常用指令](#常用指令)
   - [others action](#Others-action)
@@ -159,7 +171,7 @@ $ cp -b mistraldashboard/enabled/_50_mistral.py /usr/share/openstack-dashboard/o
 ```
 $ service apache2 restart
 ```
-！[Mistral horizon](https://i.imgur.com/3ujmzUI.png)
+![Mistral horizon](https://i.imgur.com/3ujmzUI.png)
 
 #### 運行Mistral server
 ```
@@ -298,10 +310,6 @@ connection = mysql+pymysql://mistral:mistral@10.0.1.99/mistral
 # disable authentication for the Mistral service
 auth_enable = false
 ```
-#### 運行Mistral server
-```shell
-$ mistral-server --server api,engine,executor --config-file /etc/mistral/mistral.conf
-```
 #### 初始化資料庫
 ```shell
 $ mistral-db-manage --config-file /etc/mistral/mistral.conf upgrade head
@@ -310,6 +318,10 @@ $ mistral-db-manage --config-file /etc/mistral/mistral.conf populate
 #### 安裝Mistral client
 ```shell
 $ pip install python-mistralclient
+```
+#### 運行Mistral server
+```shell
+$ mistral-server --server api,engine,executor --config-file /etc/mistral/mistral.conf
 ```
 ## 技巧
 [https://blog.csdn.net/tpiperatgod/article/details/56282219](https://blog.csdn.net/tpiperatgod/article/details/56282219)
