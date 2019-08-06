@@ -208,7 +208,7 @@ heartbeat_interval = 5.0
 ```
 完成後即可執行
 > hostname:titan1,pid:23717
-```
+```shell
 $ mistral service-list
 +--------------+----------------+
 | Name         | Type           |
@@ -1023,7 +1023,7 @@ $ mistral workflow-create hello_Ad_hoc_workflow.yaml
 +--------------------------------------+-----------------------+-----------+----------------------------------+--------+-------+---------------------+------------+
 ```
 #### 使用workflow（hello_Ad_hoc_workflow）
-```
+```shell
 $ mistral execution-create hello_Ad_hoc_workflow '{"name": "Titan"}'
 +--------------------+--------------------------------------+
 | Field              | Value                                |
