@@ -28,7 +28,7 @@
   - [2.without base on OpenStack](#2-without-base-on-openstack)
     - [安裝mariadb](#安裝mariadb)
     - [安裝message queue](#安裝message-queue)
-    - [安裝必要元件](#安裝必要元件)
+    - [安裝必要元件](#安裝必要元件-1)
     - [安裝Mistral server](#安裝mistral-server-1)
     - [產生配置文件](#產生配置文件-1)
     - [建立Mistral及logs目錄](#建立mistral及logs目錄-1)
