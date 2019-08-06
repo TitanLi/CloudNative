@@ -33,7 +33,7 @@
     - [產生配置文件](#產生配置文件-1)
     - [建立Mistral及logs目錄](#建立mistral及logs目錄-1)
     - [複製配置文件](#複製配置文件-1)
-    - [修改配置文件](Mistral#修改配置文件-1)
+    - [修改配置文件](#修改配置文件-1)
     - [初始化資料庫](#初始化資料庫-1)
     - [安裝Mistral client](#安裝mistral-client-1)
     - [運行Mistral server](#運行mistral-server-1)
