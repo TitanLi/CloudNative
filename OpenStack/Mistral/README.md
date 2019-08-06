@@ -245,6 +245,17 @@ js_implementation = pyv8
 #### 安裝mariadb
 ```shell
 $ apt install mariadb-server python-pymysql
+$ vim /etc/mysql/mariadb.conf.d/99-mistral.cnf
+# 新增以下內容
+[mysqld]
+bind-address = 10.0.1.11
+
+default-storage-engine = innodb
+innodb_file_per_table = on
+max_connections = 4096
+collation-server = utf8_general_ci
+character-set-server = utf8
+
 $ service mysql restart
 $ mysql_secure_installation
 1. Enter current password for root (enter for none)：輸入root密碼，第一次設定時預設值是空的，所以直接按Enter即可，接著會詢問是否要設定root密碼，輸入「Ｎ」
