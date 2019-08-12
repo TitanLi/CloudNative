@@ -3,6 +3,10 @@
 
 [Welcome to the Mistral documentation](https://docs.openstack.org/mistral/latest/)
 
+[YAQL語法](https://yaql.readthedocs.io/en/latest/readme.html#project-resources)
+
+[Debugging Mistral](http://www.dougalmatthews.com/2016/Sep/21/debugging-mistral-in-tripleo/)
+
 ----
 
 ## Table of Contents
