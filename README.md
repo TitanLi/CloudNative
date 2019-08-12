@@ -8,3 +8,9 @@
 
 ## Neutron Architecture
 [Neutron Architecture](https://github.com/TitanLi/OpenStack/blob/master/markdown/neutron/architecture.md)
+
+## Install the OpenStack command-line clients
+[Install the OpenStack command-line clients](https://docs.openstack.org/mitaka/user-guide/common/cli_install_openstack_command_line_clients.html)
+
+## Use command-line client
+[Use command-line client](https://docs.openstack.org/ocata/cli-reference/nova.html)

@@ -33,7 +33,22 @@ $ systemctl restart sshd.service
 $ sudo fdisk -l
 
 # 格式化
-$ mkfs.ext4 /dev/yourpartitionhere
+$ sudo mkfs.ext4 /dev/sda
+mke2fs 1.42.13 (17-May-2015)
+/dev/sda contains a ext4 file system
+	created on Sat Aug 10 06:44:12 2019
+Proceed anyway? (y,n) y
+Creating filesystem with 244190646 4k blocks and 61054976 inodes
+Filesystem UUID: fc9ab4a8-b438-4b96-8be5-a4d7ea05628d
+Superblock backups stored on blocks: 
+	32768, 98304, 163840, 229376, 294912, 819200, 884736, 1605632, 2654208, 
+	4096000, 7962624, 11239424, 20480000, 23887872, 71663616, 78675968, 
+	102400000, 214990848
+
+Allocating group tables: done                            
+Writing inode tables: done                            
+Creating journal (32768 blocks): done
+Writing superblocks and filesystem accounting information: done
 ```
 
 ## 查看CPU的溫度
