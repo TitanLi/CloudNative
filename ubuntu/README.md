@@ -6,7 +6,13 @@
 * [格式化硬碟](#格式化硬碟)
 * [查看CPU的溫度](#查看CPU的溫度)
 * [CPU資訊](#CPU資訊)
-
+* [查看資源使用率](#查看資源使用率)
+  - [Memory](#memory)
+  - [CPU](#CPU)
+  - [高級工具](#高級工具)
+* [查看已使用的port](#查看已使用的port)
+* [問題解決](#問題解決)
+  - [E: Sub-process /usr/bin/dpkg returned an error code](#e-sub-process-usrbindpkg-returned-an-error-code)
 ----
 
 ## 密碼設定
@@ -136,4 +142,39 @@ clflush size	: 64
 cache_alignment	: 64
 address sizes	: 39 bits physical, 48 bits virtual
 power management:
+```
+
+## 查看資源使用率
+### memory
+```shell
+$ free -m
+```
+### CPU
+```shell
+$ top
+```
+### 高級工具
+```shell
+$ sudo apt-get install htop
+$ htop
+```
+
+## 查看已使用的port
+```
+$ sudo netstat -tulpn
+Active Internet connections (only servers)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name
+tcp        0      0 10.0.1.11:3306          0.0.0.0:*               LISTEN      10684/mysqld    
+tcp        0      0 10.0.1.11:11211         0.0.0.0:*               LISTEN      24891/memcached 
+tcp        0      0 0.0.0.0:9292            0.0.0.0:*               LISTEN      17043/python2   
+tcp        0      0 0.0.0.0:4369            0.0.0.0:*               LISTEN      11712/epmd      
+tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      1528/sshd
+```
+
+## 問題解決
+### E: Sub-process /usr/bin/dpkg returned an error code
+```
+$ sudo mv /var/lib/dpkg/info /var/lib/dpkg/info.bak
+$ sudo mkdir /var/lib/dpkg/info
+$ sudo apt-get update
 ```
