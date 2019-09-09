@@ -162,7 +162,7 @@ $ mistral-db-manage --config-file /etc/mistral/mistral.conf populate
 $ pip install python-mistralclient
 ```
 
-#### 安装Mistral horizon
+#### 安裝Mistral horizon
 ```
 $ git clone https://git.openstack.org/openstack/mistral-dashboard.git -b stable/queens
 $ cd mistral-dashboard/
@@ -278,6 +278,29 @@ MariaDB [mistral]> GRANT ALL PRIVILEGES ON mistral.* TO 'mistral'@'localhost' ID
 MariaDB [mistral]> GRANT ALL PRIVILEGES ON mistral.* TO 'mistral'@'%' IDENTIFIED BY 'mistral';
 MariaDB [mistral]> flush privileges;
 MariaDB [mistral]> exit;
+```
+> 若mariadb server開放外部連接需執行
+#### 將mariadb server對外
+```shell
+$ mysql -u root -p
+# "mistral" user name
+# % 開放連線的IP位址, 如果用'%', 會讓所有電腦皆可連線
+# password 連線密碼
+MariaDB [(none)]> GRANT ALL PRIVILEGES ON *.* TO 'mistral'@'%' IDENTIFIED BY 'password';
+MariaDB [(none)]> FLUSH PRIVILEGES;
+
+# 設定 Ubuntu 防火牆
+$ ufw allow 3306
+
+$ vim /etc/mysql/mariadb.conf.d/99-mistral.cnf
+[mysqld]
+# 註解掉此行
+# bind-address = 10.0.1.11
+
+$ service mysql restart
+
+# 測試遠端登入
+$ mysql -h 10.0.1.52 -u mistral -p
 ```
 #### 安裝Message queue
 ```shell
