@@ -374,6 +374,16 @@ $ openstack floating ip set --port 89add801-e79c-45c6-bd4a-2c458311bd19 ea4e559e
 $ curl http://10.0.1.22
 ```
 ---
+# 常用指令
+## SSH into Amphorae
+```
+$ ssh -i /etc/octavia/.ssh/octavia_ssh_key ubuntu@[lb_network_ip]
+```
+## Generating a List of Amphorae to Rotate
+```
+$ openstack server list --name amphora* --all -c ID -c Status -c Networks
+```
+---
 ## 停止服務與清除：若不想再使用本次安裝，可以透過以下方式做移除動作
 ```
 $ ./unstack.sh
