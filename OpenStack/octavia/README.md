@@ -370,6 +370,7 @@ $ openstack floating ip create public
 $ openstack floating ip set --port 89add801-e79c-45c6-bd4a-2c458311bd19 ea4e559e-d923-4767-a059-2b821aa7e853
 ```
 9. 驗證
+> 需開啟相對應Security Group條件
 ```shell
 $ curl http://10.0.1.22
 ```
