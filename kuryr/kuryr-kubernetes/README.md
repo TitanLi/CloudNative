@@ -4,7 +4,7 @@
 > 建議進入devstack所使用的使用者
 
 > sudo su - stack
-```
+```shell
 $ sudo apt install -y python-pip
 $ sudo apt install -y virtualenv
 $ mkdir kuryr-k8s-controller
@@ -19,8 +19,8 @@ $ ./tools/generate_config_file_samples.sh
 $ sudo mkdir /etc/kuryr/
 $ sudo cp etc/kuryr.conf.sample /etc/kuryr/kuryr.conf
 ```
-編輯配置檔/etc/kuryr/kuryr.conf
-```
+## 編輯配置檔/etc/kuryr/kuryr.conf
+```shell
 $ sudo vim /etc/kuryr/kuryr.conf
 [DEFAULT]
 use_stderr = true
@@ -46,7 +46,7 @@ service_subnet = 91322fae-b300-486d-8572-e4c8eef5d177
 ```
 
 ## 建立k8s sa
-```
+```shell
 $ kubectl create sa titan-sa
 
 $ kubectl get sa titan-sa
@@ -87,7 +87,7 @@ NAME                   TYPE                                  DATA   AGE
 titan-sa-token-89g4x   kubernetes.io/service-account-token   3      27m
 ```
 ## 給予權限
-```
+```shell
 $ kubectl create clusterrolebinding titan-binding --serviceaccount=default:titan-sa --clusterrole=cluster-admin
 
 $ kubectl get clusterrolebinding | grep titan
@@ -99,7 +99,7 @@ $ kubectl get clusterrolebinding | grep titan
 1. 建立一個k8s project
 2. 建立一個k8s user(目前使用admin)
 3. 建立pod network ，kuryr建議子網設定是10.1.0.0/16,Gateway:10.1.255.254(可使用Web Dashboard建立，可開DHCP)
-```
+```shell
 $ openstack network create --project admin pod
 +---------------------------+--------------------------------------+
 | Field                     | Value                                |
@@ -162,7 +162,7 @@ $ openstack subnet create --project admin --network pod --no-dhcp --gateway 10.1
 ```
 4. 建立service network ，kuryr建議子網設定是10.2.0.0/16,Gateway:10.2.255.254
                         subnet pool只給10.2.128.1~10.2.255.253，前半留給loadbalancer(可使用Web Dashboard建立，可開DHCP)
-```
+```shell
 $ openstack network create --project admin services
 +---------------------------+--------------------------------------+
 | Field                     | Value                                |
@@ -225,7 +225,7 @@ $ openstack subnet create --project admin --network services --no-dhcp --gateway
 ```
 5. 建立一個router，把pod subnet和service subnet的Gateway都連起來(可使用Web Dashboard建立，可開DHCP)
 > 可連接public network方便之後測試使用
-```
+```shell
 $ openstack router create --project admin kuryr-kubernetes
 +-------------------------+--------------------------------------+
 | Field                   | Value                                |
@@ -333,7 +333,7 @@ service_subnet = c3e52567-5202-4396-954b-806ce64094ed
 ```
 6. 建立一個security group，允許來自pod network和service network的所有TCP(目前使用admin default)
 > 可開啟ICMP、TCP、UDP(Egress和Ingress)
-```
+```shell
 # 可使用Web Dashboard建立
 $ openstack security group create --project admin service_pod_access_sg
 +-----------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -380,7 +380,7 @@ pod_security_groups = 57a4f2cc-028f-4f70-a28a-7d179a0e66b0
 ```
 
 ## 建立loadbalancer
-```
+```shell
 # services subnet ID
 $ openstack loadbalancer create --project admin --vip-address 10.2.0.1 --vip-subnet-id d33f310d-c40c-443c-9063-87c9a48bbe86 --name default/kubernetes
 +---------------------+--------------------------------------+
@@ -410,7 +410,7 @@ $ openstack loadbalancer create --project admin --vip-address 10.2.0.1 --vip-sub
 > 需等待loadbalancer ACTIVE
 ![loadbalancer ACTIVE](https://github.com/TitanLi/OpenStack/blob/master/kuryr/picture/loadbalancer-create.png)
 
-```
+```shell
 $ openstack loadbalancer pool create --name default/kubernetes:HTTPS:443 --protocol HTTPS --lb-algorithm LEAST_CONNECTIONS --loadbalancer b99bb41f-a312-46a9-882e-fb015a5f2686
 +----------------------+--------------------------------------+
 | Field                | Value                                |
@@ -517,7 +517,7 @@ project = 5780affc22444315af6a424d8c92b9d4
 service_subnet = 42b0e3fd-6f7b-4681-ab35-d29f517964e9
 ```
 ## 運行kuryr-k8s-controller
-```
+```shell
 $ cd kuryr-k8s-controller/
 $ . env/bin/activate
 $ cd kuryr-kubernetes/
@@ -536,7 +536,7 @@ $ kuryr-k8s-controller --config-file /etc/kuryr/kuryr.conf -d
 
 > 建議在/home/ubuntu/
 ## 安裝配置kuryr-CNI在k8s node
-```
+```shell
 $ sudo apt install -y python-pip
 $ sudo apt install -y virtualenv
 $ mkdir kuryr-k8s-cni
@@ -548,7 +548,7 @@ $ git clone https://git.openstack.org/openstack/kuryr-kubernetes -b stable/rocky
 $ pip install -e kuryr-kubernetes
 ```
 ## 建立配置檔(k8s node)
-```
+```shell
 $ cd kuryr-kubernetes
 # 可不用執行
 # $ ./tools/generate_config_file_samples.sh
@@ -556,7 +556,7 @@ $ sudo mkdir -p /etc/kuryr/
 # $ sudo cp etc/kuryr.conf.sample /etc/kuryr/kuryr.conf
 ```
 ## 編輯配置檔/etc/kuryr/kuryr.conf(k8s node)
-```
+```shell
 $ sudo vim /etc/kuryr/kuryr.conf
 [DEFAULT]
 use_stderr = true
@@ -570,7 +570,7 @@ token_file = /home/ubuntu/token
 ```
 ## 複製/etc/kubernetes/pki/ca.crt至Kuryr-cni node：
 kuryr-cni node
-```
+```shell
 $ sudo su
 $ mkdir -p /etc/kubernetes/pki/
 
@@ -583,7 +583,7 @@ $ sudo su
 $ scp /etc/kubernetes/pki/ca.crt root@10.0.1.98:/etc/kubernetes/pki/ca.crt
 ```
 ## 將CNI二進製文件鏈接到CNI目錄，其中kubelet會找到它(k8s node)：
-```
+```shell
 $ cd /home/ubuntu/kuryr-k8s-cni/
 $ . env/bin/activate
 $ cd /home/ubuntu/kuryr-k8s-cni/env/local/bin
@@ -591,7 +591,7 @@ $ sudo ln -s $(which kuryr-cni) /opt/cni/bin/
 $ sudo chmod +x /opt/cni/bin/kuryr-cni
 ```
 ## 創建/etc/cni/net.d/10-kuryr.conf
-```
+```shell
 $ sudo vim /etc/cni/net.d/10-kuryr.conf
 新增
 {
@@ -605,7 +605,7 @@ $ sudo vim /etc/cni/net.d/10-kuryr.conf
 $ cp kuryr-kubernetes/etc/cni/net.d/10-kuryr.conf /etc/cni/net.d
 ```
 ## 讓10-kuryr.conf為目錄第一個檔案
-```
+```shell
 $ cd /etc/cni/net.d/
 # 更新元CNI檔案名稱，讓kuryr-cni可在第一個位子
 $ sudo mv 10-flannel.conflist 20-flannel.conflist 
@@ -613,12 +613,12 @@ $ ls /etc/cni/net.d/
 10-kuryr.conf  20-flannel.conflist
 ```
 ## nstall os-vif and oslo.privsep libraries
-```
+```shell
 $ deactivate
 $ sudo pip install 'oslo.privsep>=1.20.0' 'os-vif>=1.5.0'
 ```
 ## 使用sudo權限執行
-```
+```shell
 $ sudo su
 $ cd /home/ubuntu/kuryr-k8s-cni/
 $ . env/bin/activate
@@ -628,7 +628,7 @@ $ kuryr-daemon --config-file /etc/kuryr/kuryr.conf -d
 ---
 # 測試
 ## Run Pod (kubernetes master)
-```
+```shell
 $ vim myapp.yaml
 新增以下內容
 apiVersion: v1
@@ -711,23 +711,23 @@ lo        Link encap:Local Loopback
 ---
 # 常用指令
 ## SSH into Amphorae
-```
+```shell
 $ ssh -i /etc/octavia/.ssh/octavia_ssh_key ubuntu@[lb_network_ip]
 ```
-## Generating a List of Amphorae to Rotate¶
-```
+## Generating a List of Amphorae to Rotate
+```shell
 $ openstack server list --name amphora* --all -c ID -c Status -c Networks
 ```
 
 ## 問題解決
 ### 問題一:
 #### 問題:
-```
+```shell
 ERROR kuryr_kubernetes.handlers.retry [-] Report handler unhealthy LoadBalancerHandler: Forbidden: 403-{u'debuginfo': None, u'faultcode': u'Client', u'faultstring': u'Policy does not allow this request to be performed.'}
 Neutron server returns request_ids: ['req-ce0fc9b6-f1c1-4899-abd2-e43085dd21cc']
 ```
 #### 解決方法:
-```
+```shell
 $ vim admin-openrc
 新增
 export OS_PROJECT_DOMAIN_NAME=Default
@@ -743,7 +743,7 @@ $ . admin-openrc
 ```
 ### 問題二:
 #### 問題:
-```
+```shell
 $ kubectl get pod
 The connection to the server 10.0.1.98:6443 was refused - did you specify the right host or port?
 
@@ -775,7 +775,7 @@ Mar 20 18:41:43 titan2 systemd[1]: kubelet.service: Unit entered failed state.
 Mar 20 18:41:43 titan2 systemd[1]: kubelet.service: Failed with result 'exit-code'.
 ```
 #### 解決方法:
-```
+```shell
 $ sudo swapon -s
 Filename				Type		Size	Used	Priority
 /swap.img                              	file    	4194300	0	-1
