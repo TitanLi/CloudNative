@@ -90,6 +90,7 @@ $ python setup.py install
 
 #### 產生配置文件
 ```
+$ sudo su
 $ oslo-config-generator --config-file tools/config/config-generator.mistral.conf --output-file etc/mistral.conf
 ```
 
