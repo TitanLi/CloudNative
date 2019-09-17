@@ -2,6 +2,19 @@
 [Install Tacker](https://docs.openstack.org/tacker/latest/install/manual_installation.html#registering-default-vim)
 
 [Tacker基本操作](https://docs.openstack.org/tacker/latest/user/multisite_vim_usage_guide.html)
+
+----
+
+## Table of Contents
+* [使用教學](#使用教學)
+  - [新增vim](#新增vim)
+  - [Updating a VIM](#updating-a-vim)
+  - [Deleting a VIM](#deleting-a-vim)
+  - [建立VNFD Template](#建立vnfd-template)
+  - [Onboard a VNFD](#onboard-a-vnfd)
+  - [Deploying a new VNF on registered VIM](#deploying-a-new-vnf-on-registered-vim)
+  - [常用Tacker命令](#常用tacker命令)
+# 使用教學
 ## 新增VIM
 ```shell
 $ vim vim_config.yaml
@@ -32,7 +45,7 @@ $ openstack vim set VIM0 --config-file update.yaml
 ```shell
 $ openstack vim delete VIM1
 ```
-## 驗證
+## 建立VNFD Template
 ```yaml
 $ vim sample-vnfd.yaml
 
