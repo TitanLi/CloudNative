@@ -3,23 +3,23 @@
 
 ## Install dependencies
 master、node
-```
+```shell
 $ sudo apt-get update
 $ sudo apt-get install -y python-dev libffi-dev gcc libssl-dev python-selinux python-setuptools
 ```
 
 ## Install python
 master、node
-```
+```shell
 $ sudo apt-get install -y python-pip
 $ pip --version
-$ sudo su
-$ pip install -U pip
+# $ sudo su
+# $ pip install -U pip
 ```
 
 ## pip版本高於10.0.0
 master、node
-```
+```shell
 $ vim /usr/bin/pip
 將以下
 #from pip import main
@@ -33,7 +33,7 @@ if __name__ == '__main__':
 
 ## 加入ssh key
 master、node
-```
+```shell
 root@titan1:/home/ubuntu# ssh-keygen
 root@titan1:/home/ubuntu# cat /root/.ssh/id_rsa.pub
 root@titan1:/home/ubuntu# vim /root/.ssh/authorized_keys
@@ -42,7 +42,7 @@ root@titan2:/home/ubuntu# vim /root/.ssh/authorized_keys
 
 ## Install dependencies using a virtual environment
 master
-```
+```shell
 $ sudo apt-get install -y python-virtualenv
 $ virtualenv env
 $ source env/bin/activate
@@ -52,14 +52,14 @@ $ source env/bin/activate
 
 ## Install ansible
 master
-```
+```shell
 $ sudo apt-get install -y ansible
 $ pip install ansible
 ```
 
 ## Configure Ansible
 master
-```
+```shell
 $ vim /etc/ansible/ansible.cfg
 [defaults]
 host_key_checking=False
@@ -69,7 +69,7 @@ forks=100
 
 ## Install Kolla
 master
-```
+```shell
 $ git clone https://github.com/openstack/kolla -b stable/rocky
 $ git clone https://github.com/openstack/kolla-ansible -b stable/rocky
 
@@ -88,7 +88,7 @@ $ python kolla-ansible/tools/generate_passwords.py
 
 ## 編輯/etc/hosts
 master、node
-```
+```shell
 $ vim /etc/hosts
 127.0.0.1 localhost
 10.0.1.97 controller1
@@ -97,7 +97,7 @@ $ vim /etc/hosts
 
 ## 編輯DNS
 master、node
-```
+```shell
 $ vim /etc/resolv.conf
 nameserver 8.8.8.8
 ```
@@ -115,7 +115,7 @@ master
 > storage_interface
 
 > ansible_user=root  
-```
+```shell
 $ vim kolla-ansible/ansible/inventory/multinode
 [control]
 controller1 neutron_external_interface=ens3 api_interface=eno1 network_interface=eno1 tunnel_interface=eno1 ansible_user=root
@@ -142,7 +142,7 @@ $ ansible -i kolla-ansible/ansible/inventory/multinode all -m raw -a "apt-get -y
 
 ## Prepare initial configuration(globals)
 master
-```
+```shell
 $ vim /etc/kolla/globals.yml 
 kolla_base_distro: "ubuntu"
 kolla_install_type: "source"
@@ -161,7 +161,7 @@ $ kolla-ansible/tools/kolla-ansible -i kolla-ansible/ansible/inventory/multinode
 
 ## Use OpenStack
 master
-```
+```shell
 $ pip install python-openstackclient python-glanceclient python-neutronclient --ignore-installed PyYAML
 $ kolla-ansible/tools/kolla-ansible post-deploy
 $ . /etc/kolla/admin-openrc.sh
@@ -169,7 +169,7 @@ $ . /etc/kolla/admin-openrc.sh
 
 ## Upload image
 master
-```
+```shell
 $ wget http://download.cirros-cloud.net/0.4.0/cirros-0.4.0-x86_64-disk.img
 $ openstack image create "cirros" \
   --file cirros-0.4.0-x86_64-disk.img \
@@ -178,14 +178,14 @@ $ openstack image create "cirros" \
 ```
 
 ## Create network
-```
+```shell
 # Flat Physical Network
 physical_interface_mappings = physnet1:{{ neutron_external_interface }
 ```
 
 ## 環境移除
 [Operating Kolla](https://docs.openstack.org/kolla-ansible/rocky/user/operating-kolla.html)
-```
+```shell
 #清理容器
 $ kolla-ansible/tools/cleanup-containers
 
@@ -199,9 +199,14 @@ $ kolla-ansible/tools/cleanup-images
 $ kolla-ansible/tools/kolla-ansible destroy  -i kolla-ansible/ansible/inventory/multinode --yes-i-really-really-mean-it
 ```
 
+## 進階功能
+```shell
+$ mysql -u haproxy -h <VIP>
+```
+
 ## 問題解決
 ### TASK [prechecks : Checking docker SDK version]
-```
+```shell
 deactivate
 pip install -U docker
 ```
@@ -212,8 +217,74 @@ pip install -U docker
 [https://blog.inkubate.io/configure-cinder-on-openstack-ocata-standalone-with-kolla/](https://blog.inkubate.io/configure-cinder-on-openstack-ocata-standalone-with-kolla/)
 
 [https://www.jianshu.com/p/635cdd220f63](https://www.jianshu.com/p/635cdd220f63)
-```
+```shell
 $ lsblk
 ```
 
-沒有為Mistral設置數據庫以供使用。在繼續之前，您應該確保您擁有以下││信息：││││*您要使用的數據庫類型; ││*數據庫服務器主機名（該服務器必須允許來自此│機器的TCP連接）; ││*用於訪問數據庫的用戶名和密碼。 ││││││如果缺少其中一些要求，請不要選擇此選項並使用常規SQLite支持運行。 ││││您可以稍後通過運行“dpkg-reconfigure -plow mistral-common”來更改此設置。 ││││為米斯特拉爾建立數據庫？
+### Mistral
+```shell
+$ vim /etc/kolla/globals.yml 
+# 新增
+enable_horizon_mistral: "{{ enable_mistral | bool }}"
+enable_mistral: "yes"
+
+$ pip install python-mistralclient
+
+# mistral container內設定
+[DEFAULT]
+debug = False
+log_dir = /var/log/kolla/mistral
+use_stderr = False
+transport_url = rabbit://openstack:dmjsV4JJmVT5AzaISfc7k1yELngPOoj7zEyKCQlD@10.0.1.13:5672//
+
+[api]
+host = 10.0.1.13
+port = 8989
+api_workers = 5
+
+[database]
+connection = mysql+pymysql://mistral:HdunpQn0m52CEa51FCPZZJU4Olz4bhcufdqw8Sq2@10.0.1.100:3306/mistral
+max_retries = -1
+
+[keystone_authtoken]
+www_authenticate_uri = http://10.0.1.100:5000/v3
+auth_url = http://10.0.1.100:35357/v3
+auth_type = password
+project_domain_id = default
+user_domain_id = default
+project_name = service
+username = mistral
+password = wVR48q9F02cWAzhvIFsjVoY2CgxhcUNUGzQYAodI
+memcache_security_strategy = ENCRYPT
+memcache_secret_key = gLbDatFrh3jHwGtAHmB4vQngMBIlCKyRJjsE6dF4
+memcached_servers = 10.0.1.13:11211
+
+[mistral]
+url = http://10.0.1.100:8989
+
+[openstack_actions]
+os_actions_endpoint_type = internal
+default_region = RegionOne
+
+[oslo_messaging_notifications]
+transport_url = rabbit://openstack:dmjsV4JJmVT5AzaISfc7k1yELngPOoj7zEyKCQlD@10.0.1.13:5672//
+driver = noop
+
+[coordination]
+backend_url = redis://admin:N8cgBH4rbtHM7bLHabkUnlyWRIF7H0Y6PSCSPZ7L@10.0.1.13:26379?sentinel=kolla&socket_timeout=60&retry_on_timeout=yes
+
+[pecan]
+auth_enable=False
+```
+
+### Tacker
+```shell
+$ vim /etc/kolla/globals.yml 
+# 新增
+enable_tacker: "yes"
+enable_barbican: "yes"
+enable_mistral: "yes"
+enable_redis: "yes"
+
+$ pip install python-tackerclient
+```
