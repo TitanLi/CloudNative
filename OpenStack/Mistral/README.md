@@ -199,9 +199,10 @@ $ mistral-server --server executor --config-file /etc/mistral/mistral.conf
 $ mistral-server --server api,engine --config-file <path-to-mistral.conf>
 ```
 
-#### 新增admin-openrc
+#### 測試Mistral CLI
 ```shell
 $ vim admin-openrc
+# 新增內容
 export OS_PROJECT_DOMAIN_NAME=Default
 export OS_USER_DOMAIN_NAME=Default
 export OS_PROJECT_NAME=admin
@@ -210,10 +211,7 @@ export OS_PASSWORD=ADMIN_PASS
 export OS_AUTH_URL=http://controller:5000/v3
 export OS_IDENTITY_API_VERSION=3
 export OS_IMAGE_API_VERSION=2
-```
 
-#### 測試Mistral CLI
-```
 $ . admin-openrc
 $ mistral workbook-list
 $ mistral action-list
