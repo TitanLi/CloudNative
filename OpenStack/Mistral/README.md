@@ -75,12 +75,14 @@
 ### 1. base on OpenStack
 #### 安裝必要元件
 ```
-$ apt-get install python-dev python-setuptools python-pip libffi-dev \
+$ sudo apt-get install -y python-dev python-setuptools python-pip libffi-dev \
   libxslt1-dev libxml2-dev libyaml-dev libssl-dev
 ```
 
 #### 安裝Mistral server
 ```
+$ sudo su
+# 建議使用master
 $ git clone https://github.com/openstack/mistral.git
 $ cd mistral
 
@@ -197,8 +199,22 @@ $ mistral-server --server executor --config-file /etc/mistral/mistral.conf
 $ mistral-server --server api,engine --config-file <path-to-mistral.conf>
 ```
 
+#### 新增admin-openrc
+```shell
+$ vim admin-openrc
+export OS_PROJECT_DOMAIN_NAME=Default
+export OS_USER_DOMAIN_NAME=Default
+export OS_PROJECT_NAME=admin
+export OS_USERNAME=admin
+export OS_PASSWORD=ADMIN_PASS
+export OS_AUTH_URL=http://controller:5000/v3
+export OS_IDENTITY_API_VERSION=3
+export OS_IMAGE_API_VERSION=2
+```
+
 #### 測試Mistral CLI
 ```
+$ . admin-openrc
 $ mistral workbook-list
 $ mistral action-list
 ```
@@ -239,6 +255,14 @@ $ cd pyv8
 $ sudo apt-get install build-essential autoconf libtool pkg-config python-opengl python-imaging python-pyrex python-pyside.qtopengl idle-python2.7 qt4-dev-tools qt4-designer libqtgui4 libqtcore4 libqt4-xml libqt4-test libqt4-script libqt4-network libqt4-dbus python-qt4 python-qt4-gl libgle3 python-dev
 $ python setup.py build
 $ sudo python setup.py install
+或
+$ apt-get update && apt-get install libboost-all-dev
+$ git clone https://github.com/emmetio/pyv8-binaries
+$ cd pyv8-binaries/
+$ apt install unzip
+$ unzip pyv8-linux64.zip
+$ mv _PyV8.so /usr/lib/python2.7/dist-packages/
+$ mv PyV8.py /usr/lib/python2.7/dist-packages/
 ```
 編輯Misrtal配置文件
 ```

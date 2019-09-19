@@ -181,7 +181,7 @@ workflows:
           - create_server
       # 建立VM
       create_server:
-        action: nova.servers_create key_name=<% $.key_name %> name=<% $.vm_name %> image=<% task(find_resource).result.image_id %> flavor=<% task(find_resource).result.flavors_id %>
+        action: nova.servers_create key_name=<% $.key_name %> name=<% $.vm_name %> image=<% task(find_resource).result.image_id %> flavor=<% task(find_resource).result.flavors_id %> nics='auto'
         publish:
           vm_id: <% task().result.id %>
         on-success:
