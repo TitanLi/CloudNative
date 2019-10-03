@@ -6,6 +6,8 @@
 ----
 
 ## Table of Contents
+* [環境安裝](#環境安裝)
+  - [Prepare initial configuration(globals)](#Prepare-initial-configuration-globals)
 * [使用教學](#使用教學)
   - [新增vim](#新增vim)
   - [Updating a VIM](#updating-a-vim)
@@ -14,6 +16,46 @@
   - [Onboard a VNFD](#onboard-a-vnfd)
   - [Deploying a new VNF on registered VIM](#deploying-a-new-vnf-on-registered-vim)
   - [常用Tacker命令](#常用tacker命令)
+    - [可用VIM列表](#可用VIM列表)
+    - [Create VNF](#create-vnf)
+    - [VNFD or VNF list](#vnfd-or-vnf-list)
+    - [Finding VNFM Status](#finding-vnfm-status)
+    - [Deleting VNF and VNFD](#deleting-vnf-and-vnfd)
+  - [問題解決](#問題解決)
+    - [tacker CLI](#tacker-cli)
+# 環境安裝
+## Prepare initial configuration(globals)
+master
+```shell
+$ vim /etc/kolla/globals.yml 
+kolla_base_distro: "ubuntu"
+kolla_install_type: "source"
+openstack_release: "rocky"
+kolla_internal_vip_address: "10.0.1.100"
+network_interface: "eno1"
+neutron_external_interface: "ens3"
+keepalived_virtual_router_id: "96"
+enable_glance: "yes"
+enable_haproxy: "yes"
+enable_keystone: "yes"
+enable_mariadb: "yes"
+enable_memcached: "yes"
+enable_neutron: "yes"
+enable_nova: "yes"
+enable_rabbitmq: "yes"
+enable_aodh: "yes"
+enable_ceilometer: "yes"
+enable_gnocchi: "yes"
+enable_heat: "yes"
+enable_horizon: "yes"
+enable_neutron_sfc: "yes"
+enable_barbican: "yes"
+enable_mistral: "yes"
+enable_redis: "yes"
+enable_tacker: "yes"
+# enable_cinder: "yes"
+# enable_cinder_backend_iscsi: "yes"
+```
 # 使用教學
 ## 新增VIM
 ```shell
@@ -103,12 +145,50 @@ $ openstack vnf descriptor create --vnfd-file sample-vnfd.yaml samplevnfd
 $ openstack vnf create --vnfd-name samplevnfd samplevnf
 ```
 ## 常用Tacker命令
+### 可用VIM列表
 ```shell
-# 可用VIM列表
 $ openstack vim list
+```
+### Create VNF
+方法一:
+```shell
+$ openstack vnf descriptor create --vnfd-file <yaml file path> <VNFD-NAME>
+$ openstack vnf create --vnfd-name <VNFD-FILE-NAME> <VNF-NAME>
+```
+方法二:
+```shell
+$ openstack vnf create --vnfd-template <VNFD-FILE-NAME> <VNF-NAME>
+```
+### VNFD or VNF list
+```shell
 # VNFD
 $ openstack vnf descriptor list
 # VNF
 $ openstack vnf list
 $ openstack vnf show samplevnf
+```
+### Finding VNFM Status
+```shell
+$ openstack vim list
+$ openstack vnf descriptor list
+$ openstack vnf list
+$ openstack vnf show <VNF_ID>
+$ openstack vnf descriptor show <VNFD_ID>
+```
+### Deleting VNF and VNFD
+```shell
+$ openstack vnf delete <VNF_ID/NAME>
+$ openstack vnf descriptor delete <VNFD_ID/NAME>
+```
+## 問題解決
+1.  tacker CLI
+問題
+```shell
+$ openstack vnf descriptor create --vnfd-file tosca-vnffg-vnfd1.yaml VNFD1 
+openstack: 'vnf descriptor create --vnfd-file tosca-vnffg-vnfd1.yaml VNFD1' is not an openstack command. See 'openstack --help'.
+```
+解決方法
+```shell
+$ pip install python-tackerclient
+$ pip install --upgrade python-openstackclient
 ```

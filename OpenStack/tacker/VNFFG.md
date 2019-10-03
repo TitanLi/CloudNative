@@ -10,11 +10,35 @@
 * [Create VNFFG](#create-vnffg)
 * [VNFFGD(共用)](#vnffgd共用)
 * [Update VNFFG](#update-vnffg)
+## create VIM
+```shell
+$ vim vim_config.yaml
+auth_url: 'http://10.0.1.100:35357/v3'
+username: 'admin'
+password: '9Y9vpZaTHIbRD17hMOKylxvPb1RIKplbmvp58ug0'
+project_name: 'admin'
+project_domain_name: 'Default'
+user_domain_name: 'Default'
+# 關閉SSL
+cert_verify: 'False'
+
+# 建立默認VIM
+$ openstack vim register --config-file vim_config.yaml \
+       --description 'my first vim' --is-default hellovim
+```
+## network
+1. net_mgmt 10.20.0.0/24 10.20.0.254
+2. net0 10.30.0.0/24 10.30.0.254
+3. net1 10.40.0.0/24 10.40.0.254
+## flavor
+1. m1.tiny VCPU:2 Mem:2048(MB) Disk:100(GB)
+## key-name
+1. Add key-name 
 ## Create HTTP client and HTTP server
 ```shell
 $ net_id=$(openstack network list | grep net0 | awk '{print $2}')
-$ openstack server create --flavor m1.tiny --image cirros --nic net-id=$net_id http_client
-$ openstack server create --flavor m1.tiny --image cirros --nic net-id=$net_id http_server
+$ openstack server create --flavor m1.tiny --image ubuntu --key-name Titan --nic net-id=$net_id http_client
+$ openstack server create --flavor m1.tiny --image ubuntu --key-name Titan  --nic net-id=$net_id http_server
 ```
 ## 取得Port ID
 ```shell
@@ -30,6 +54,7 @@ $ echo $network_dest_port_id
 48217155-a950-4cec-80ab-de14fa63c19f
 ```
 ## tosca-vnffg-vnfd1
+ubuntu
 ```yaml
 $ vim tosca-vnffg-vnfd1.yaml
 tosca_definitions_version: tosca_simple_profile_for_nfv_1_0_0
@@ -46,11 +71,11 @@ topology_template:
       capabilities:
         nfv_compute:
           properties:
-            num_cpus: 1
-            mem_size: 512 MB
-            disk_size: 1 GB
+            num_cpus: 2
+            mem_size: 2048 MB
+            disk_size: 100 GB
       properties:
-        image: cirros
+        image: ubuntu
         availability_zone: nova
         mgmt_driver: noop
         key_name: Titan
@@ -61,14 +86,16 @@ topology_template:
         user_data: |
           #!/bin/sh
           echo 1 > /proc/sys/net/ipv4/ip_forward
-          cat << EOF >> /etc/network/interfaces
-          auto eth1
-          iface eth1 inet dhcp
-          auto eth2
-          iface eth2 inet dhcp
+          cat << EOF >> /etc/network/interfaces.d/50-cloud-init.cfg
+          auto ens4
+          iface ens4 inet dhcp
+          auto ens5
+          iface ens5 inet dhcp
           EOF
-          ifup eth1
-          ifup eth2
+          sudo ifconfig ens4 up
+          sudo ifconfig ens5 up
+          sudo sysctl -p
+          sudo /etc/init.d/networking restart
     CP11:
       type: tosca.nodes.nfv.CP.Tacker
       properties:
@@ -122,6 +149,101 @@ topology_template:
         vendor: Tacker
 ```
 ## tosca-vnffg-vnfd2
+ubuntu
+```yaml
+$ vim tosca-vnffg-vnfd2.yaml
+tosca_definitions_version: tosca_simple_profile_for_nfv_1_0_0
+
+description: sample-tosca-vnfd2
+
+metadata:
+  template_name: sample-tosca-vnfd2
+
+topology_template:
+  node_templates:
+    VDU1:
+      type: tosca.nodes.nfv.VDU.Tacker
+      capabilities:
+        nfv_compute:
+          properties:
+            num_cpus: 2
+            mem_size: 2048 MB
+            disk_size: 100 GB
+      properties:
+        image: ubuntu
+        availability_zone: nova
+        mgmt_driver: noop
+        key_name: Titan
+        config: |
+          param0: key1
+          param1: key2
+        user_data_format: RAW
+        user_data: |
+          #!/bin/sh
+          echo 1 > /proc/sys/net/ipv4/ip_forward
+          cat << EOF >> /etc/network/interfaces.d/50-cloud-init.cfg
+          auto ens4
+          iface ens4 inet dhcp
+          auto ens5
+          iface ens5 inet dhcp
+          EOF
+          sudo ifconfig ens4 up
+          sudo ifconfig ens5 up
+          sudo sysctl -p
+          sudo /etc/init.d/networking restart
+    CP21:
+      type: tosca.nodes.nfv.CP.Tacker
+      properties:
+        management: true
+        order: 0
+        anti_spoofing_protection: false
+      requirements:
+        - virtualLink:
+            node: VL21
+        - virtualBinding:
+            node: VDU1
+
+    CP22:
+      type: tosca.nodes.nfv.CP.Tacker
+      properties:
+        order: 1
+        anti_spoofing_protection: false
+      requirements:
+        - virtualLink:
+            node: VL22
+        - virtualBinding:
+            node: VDU1
+
+    CP23:
+      type: tosca.nodes.nfv.CP.Tacker
+      properties:
+        order: 2
+        anti_spoofing_protection: false
+      requirements:
+        - virtualLink:
+            node: VL23
+        - virtualBinding:
+            node: VDU1
+
+    VL21:
+      type: tosca.nodes.nfv.VL
+      properties:
+        network_name: net_mgmt
+        vendor: Tacker
+
+    VL22:
+      type: tosca.nodes.nfv.VL
+      properties:
+        network_name: net0
+        vendor: Tacker
+
+    VL23:
+      type: tosca.nodes.nfv.VL
+      properties:
+        network_name: net1
+        vendor: Tacker
+```
+cirros
 ```yaml
 $ vim tosca-vnffg-vnfd2.yaml
 tosca_definitions_version: tosca_simple_profile_for_nfv_1_0_0
@@ -237,8 +359,8 @@ topology_template:
             - name: block_tcp
               classifier:
                 network_src_port_id: afced056-6176-4c7d-9b3b-05fd6226deab
-                network_dst_port_id: 48217155-a950-4cec-80ab-de14fa63c19f
-                ip_dst_prefix: 10.30.0.253/24
+                # network_dst_port_id: 48217155-a950-4cec-80ab-de14fa63c19f
+                ip_dst_prefix: 10.30.0.2/24
                 destination_port_range: 80-30000
                 ip_proto: 6
         path:
@@ -261,11 +383,6 @@ topology_template:
         constituent_vnfs: [VNFD1,VNFD2]
       members: [Forwarding_path1]
 ```
-## Create VNFFGD
-```shell
-# $ openstack vnf graph descriptor create --vnffgd-file <vnffgd-file> <vnffgd-name>
-$ openstack vnf graph descriptor create --vnffgd-file tosca-vnffgd-sample.yaml tosca-vnffgd-sample
-```
 ## Create VNFD,VNF
 ```shell
 $ openstack vnf descriptor create --vnfd-file tosca-vnffg-vnfd1.yaml VNFD1
@@ -273,6 +390,11 @@ $ openstack vnf create --vnfd-name VNFD1 VNF1
 
 $ openstack vnf descriptor create --vnfd-file tosca-vnffg-vnfd2.yaml VNFD2
 $ openstack vnf create --vnfd-name VNFD2 VNF2
+```
+## Create VNFFGD
+```shell
+# $ openstack vnf graph descriptor create --vnffgd-file <vnffgd-file> <vnffgd-name>
+$ openstack vnf graph descriptor create --vnffgd-file tosca-vnffgd-sample.yaml tosca-vnffgd-sample
 ```
 ## Create VNFFG
 > vnffgd-name : VNFFGD to use to instantiate this VNFFG <br>
@@ -298,7 +420,7 @@ $ openstack vnf list
 
 $ openstack vnf graph create --vnffgd-name tosca-vnffgd-sample --vnf-mapping VNFD1:'67148c8b-2d88-4430-96a3-85483b78d306',VNFD2:'058b9ba3-4402-4140-8dd1-1c616fb39bae' --symmetrical tosca-vnffgd-sample
 ```
-## VNFFGD(共用)
+## VNFFGD(使用參數共用)
 1. 參數Yaml file
 ```yaml
 $ vim vnffg-param-file.yaml
@@ -340,5 +462,22 @@ topology_template:
 $ openstack vnf graph create --vnffgd-name vnffgd-param --vnf-mapping VNFD1:'91e32c20-6d1f-47a4-9ba7-08f5e5effe07',\
 VNFD2:'7168062e-9fa1-4203-8cb7-f5c99ff3ee1b' --param-file vnffg-param-file.yaml myvnffg
 ```
+
+## Viewing a VNFFG
+[Viewing a VNFFG](https://docs.openstack.org/tacker/latest/user/vnffg_usage_guide.html#viewing-a-vnffg)
+
 ## Update VNFFG
 [Update VNFFG](https://docs.openstack.org/tacker/latest/user/vnffg_usage_guide.html#viewing-a-vnffg)
+
+## 常用指令
+```shell
+# 查看VNFFG定義
+$ openstack vnf graph show myvnffg
+# 查看VNF list
+$ openstack vnf list
++--------------------------------------+-------------------------+-------------------------+----------------+--------------------------------------+--------------------------------------+
+| ID                                   | Name                    | Mgmt Ip Address         | Status         | VIM ID                               | VNFD ID                              |
++--------------------------------------+-------------------------+-------------------------+----------------+--------------------------------------+--------------------------------------+
+| 058b9ba3-4402-4140-8dd1-1c616fb39bae | VNF2                    | {"VDU1": "10.20.0.132"} | ACTIVE         | 895044c5-2398-439c-8db5-2fec8c89d5b3 | b9aae699-b3a4-4965-b40a-7b7dcb0b5b9a |
+| 67148c8b-2d88-4430-96a3-85483b78d306 | VNF1                    | {"VDU1": "10.20.0.12"}  | ACTIVE         | 895044c5-2398-439c-8db5-2fec8c89d5b3 | efc6873f-bed8-4572-a56e-b86181166801 |
+```
