@@ -44,6 +44,7 @@ root@titan2:/home/ubuntu# vim /root/.ssh/authorized_keys
 master
 ```shell
 $ sudo apt-get install -y python-virtualenv
+$ sudo su
 $ virtualenv env
 $ source env/bin/activate
 # virtualenv /path/to/virtualenv
@@ -170,9 +171,17 @@ $ . /etc/kolla/admin-openrc.sh
 ## Upload image
 master
 ```shell
+# cirros
 $ wget http://download.cirros-cloud.net/0.4.0/cirros-0.4.0-x86_64-disk.img
 $ openstack image create "cirros" \
   --file cirros-0.4.0-x86_64-disk.img \
+  --disk-format qcow2 --container-format bare \
+  --public
+
+# ubuntu
+$ wget http://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-amd64-disk1.img
+$ openstack image create "ubuntu" \
+  --file xenial-server-cloudimg-amd64-disk1.img \
   --disk-format qcow2 --container-format bare \
   --public
 ```
@@ -196,6 +205,7 @@ $ kolla-ansible/tools/cleanup-host
 $ kolla-ansible/tools/cleanup-images
 
 #clean up containers and volumes in the cluster --all
+#需stop all container
 $ kolla-ansible/tools/kolla-ansible destroy  -i kolla-ansible/ansible/inventory/multinode --yes-i-really-really-mean-it
 ```
 
