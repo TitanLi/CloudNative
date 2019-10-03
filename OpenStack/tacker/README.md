@@ -22,7 +22,7 @@
     - [Finding VNFM Status](#finding-vnfm-status)
     - [Deleting VNF and VNFD](#deleting-vnf-and-vnfd)
   - [問題解決](#問題解決)
-    - [tacker CLI](#tacker-cli)
+    - [tacker CLI](#1-tacker-cli)
 # 環境安裝
 ## Prepare initial configuration(globals)
 master
@@ -181,7 +181,7 @@ $ openstack vnf delete <VNF_ID/NAME>
 $ openstack vnf descriptor delete <VNFD_ID/NAME>
 ```
 ## 問題解決
-### 1.tacker CLI
+### 1. tacker CLI
 問題
 ```shell
 $ openstack vnf descriptor create --vnfd-file tosca-vnffg-vnfd1.yaml VNFD1 
