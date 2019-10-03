@@ -7,7 +7,7 @@
 
 ## Table of Contents
 * [環境安裝](#環境安裝)
-  - [Prepare initial configuration(globals)](#Prepare-initial-configuration-globals)
+  - [Prepare initial configuration(globals)](#prepare-initial-configurationglobals)
 * [使用教學](#使用教學)
   - [新增vim](#新增vim)
   - [Updating a VIM](#updating-a-vim)
@@ -181,7 +181,7 @@ $ openstack vnf delete <VNF_ID/NAME>
 $ openstack vnf descriptor delete <VNFD_ID/NAME>
 ```
 ## 問題解決
-1.  tacker CLI
+### 1.tacker CLI
 問題
 ```shell
 $ openstack vnf descriptor create --vnfd-file tosca-vnffg-vnfd1.yaml VNFD1 
