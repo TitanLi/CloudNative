@@ -30,6 +30,8 @@ $ openstack vim register --config-file vim_config.yaml \
 1. net_mgmt 10.20.0.0/24 10.20.0.254
 2. net0 10.30.0.0/24 10.30.0.254
 3. net1 10.40.0.0/24 10.40.0.254
+## security groups
+新增ICMP、TCP、UDP
 ## flavor
 1. m1.tiny VCPU:2 Mem:2048(MB) Disk:100(GB)
 ## key-name
@@ -480,4 +482,8 @@ $ openstack vnf list
 +--------------------------------------+-------------------------+-------------------------+----------------+--------------------------------------+--------------------------------------+
 | 058b9ba3-4402-4140-8dd1-1c616fb39bae | VNF2                    | {"VDU1": "10.20.0.132"} | ACTIVE         | 895044c5-2398-439c-8db5-2fec8c89d5b3 | b9aae699-b3a4-4965-b40a-7b7dcb0b5b9a |
 | 67148c8b-2d88-4430-96a3-85483b78d306 | VNF1                    | {"VDU1": "10.20.0.12"}  | ACTIVE         | 895044c5-2398-439c-8db5-2fec8c89d5b3 | efc6873f-bed8-4572-a56e-b86181166801 |
+
+$ openstack vnf graph list
+$ openstack sfc port pair list
+$ openstack sfc flow classifier list
 ```
