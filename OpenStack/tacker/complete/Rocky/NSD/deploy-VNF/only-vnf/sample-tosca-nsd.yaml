@@ -1,0 +1,27 @@
+tosca_definitions_version: tosca_simple_profile_for_nfv_1_0_0
+
+description: Import VNFDs(already on-boarded) with input parameters
+imports:
+    - sample-tosca-vnfd1
+    - sample-tosca-vnfd2
+
+topology_template:
+  inputs:
+    vl1_name:
+      type: string
+      description: name of VL1 virtuallink
+      default: net_mgmt
+  node_templates:
+      VNF1:
+        type: tosca.nodes.nfv.VNF1
+        requirements:
+          - virtualLink1: VL1
+
+      VNF2:
+        type: tosca.nodes.nfv.VNF2
+
+      VL1:
+        type: tosca.nodes.nfv.VL
+        properties:
+          network_name: {get_input: vl1_name}
+          vendor: tacker
