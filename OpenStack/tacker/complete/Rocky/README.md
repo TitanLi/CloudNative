@@ -24,7 +24,7 @@ project_domain_name: 'Default'
 user_domain_name: 'Default'
 cert_verify: 'False'
 
-$ openstack vim register --config-file vim_config.yaml        --description 'my first vim' --is-default hellovim
+$ openstack vim register --config-file vim_config.yaml --description 'my first vim' --is-default hellovim
 ```
 ## 建立Network
 1. net_mgmt 10.10.0.0/24 10.10.0.254
@@ -46,11 +46,13 @@ $ openstack server create --flavor m1.tiny --image ubuntu --key-name Titan  --ni
 ```shell
 $ vim tosca-vnffg-vnfd1.yaml
 $ vim tosca-vnffg-vnfd2.yaml
+# openstack vnf descriptor create --vnfd-file tosca-vnffg-vnfd1.yaml vnfd1
 $ tacker vnfd-create --vnfd-file tosca-vnffg-vnfd1.yaml vnfd1
 $ tacker vnfd-create --vnfd-file tosca-vnffg-vnfd2.yaml vnfd2
 ```
 ## Create VNF
-```yaml
+```shell
+# openstack vnf create --vnfd-name vnfd1 vnf1_001
 $ tacker vnf-create --vnfd-name vnfd1 vnf1_001
 $ tacker vnf-create --vnfd-name vnfd2 vnf2_001
 ```
