@@ -18,7 +18,7 @@ kolla_base_distro: "ubuntu"
 kolla_install_type: "source"
 
 # Valid option is Docker repository tag
-openstack_release: "stein"
+openstack_release: "rocky"
 
 # Location of configuration overrides
 #node_custom_config: "/etc/kolla/config"
@@ -57,8 +57,6 @@ kolla_internal_vip_address: "10.0.1.101"
 #docker_registry_username: "sam"
 #docker_registry_password: "correcthorsebatterystaple"
 
-#docker_configure_for_zun: "no"
-
 ###################
 # Messaging options
 ###################
@@ -92,11 +90,8 @@ network_interface: "eno1"
 #api_interface: "{{ network_interface }}"
 #storage_interface: "{{ network_interface }}"
 #cluster_interface: "{{ network_interface }}"
-#swift_storage_interface: "{{ storage_interface }}"
-#swift_replication_interface: "{{ swift_storage_interface }}"
 #tunnel_interface: "{{ network_interface }}"
 #dns_interface: "{{ network_interface }}"
-#octavia_network_interface: "{{ api_interface }}"
 
 # This is the raw interface given to neutron as its external network port. Even
 # though an IP address can exist on this interface, it will be unusable in most
@@ -110,13 +105,6 @@ neutron_external_interface: "ens3"
 
 # Valid options are [ internal, infoblox ]
 #neutron_ipam_driver: "internal"
-
-# Configure Neutron upgrade option, currently Kolla support
-# two upgrade ways for Neutron: legacy_upgrade and rolling_upgrade
-# The variable "neutron_enable_rolling_upgrade: yes" is meaning rolling_upgrade
-# were enabled and opposite
-# Neutron rolling upgrade were enable by default
-#neutron_enable_rolling_upgrade: "yes"
 
 
 ####################
@@ -146,7 +134,6 @@ keepalived_virtual_router_id: "101"
 #    mem_reservation:
 #    memswap_limit:
 #    kernel_memory:
-#    ulimits:
 
 
 #############
@@ -156,7 +143,7 @@ keepalived_virtual_router_id: "101"
 # TLS can be enabled.  When TLS is enabled, certificates must be provided to
 # allow clients to perform authentication.
 #kolla_enable_tls_external: "no"
-#kolla_external_fqdn_cert: "{{ node_config }}/certificates/haproxy.pem"
+#kolla_external_fqdn_cert: "{{ node_config_directory }}/certificates/haproxy.pem"
 
 ################
 # Region options
@@ -184,30 +171,11 @@ keepalived_virtual_router_id: "101"
 # Valid options are [ none, novnc, spice, rdp ]
 #nova_console: "novnc"
 
-# These roles are required for Kolla to be operation, however a savvy deployer
-# could disable some of these required roles and run their own services.
-#enable_glance: "{{ enable_openstack_core | bool }}"
-enable_glance: "yes"
-enable_haproxy: "yes"
-#enable_keepalived: "{{ enable_haproxy | bool }}"
-#enable_keystone: "{{ enable_openstack_core | bool }}"
-enable_keystone: "yes"
-enable_mariadb: "yes"
-enable_memcached: "yes"
-#enable_neutron: "{{ enable_openstack_core | bool }}"
-enable_neutron: "yes"
-#enable_nova: "{{ enable_openstack_core | bool }}"
-enable_nova: "yes"
-#enable_rabbitmq: "{{ 'yes' if om_rpc_transport == 'rabbit' or om_notify_transport == 'rabbit' else 'no' }}"
-enable_rabbitmq: "yes"
-#enable_outward_rabbitmq: "{{ enable_murano | bool }}"
-
 # OpenStack services can be enabled or disabled with these options
 enable_aodh: "yes"
 enable_barbican: "yes"
 #enable_blazar: "no"
 enable_ceilometer: "yes"
-#enable_ceilometer_ipmi: "no"
 #enable_central_logging: "no"
 #enable_ceph: "no"
 #enable_ceph_mds: "no"
@@ -222,11 +190,9 @@ enable_ceilometer: "yes"
 #enable_cinder_backend_iscsi: "no"
 #enable_cinder_backend_lvm: "no"
 #enable_cinder_backend_nfs: "no"
-#enable_cinder_backend_quobyte: "no"
 #enable_cloudkitty: "no"
 #enable_collectd: "no"
 #enable_congress: "no"
-#enable_cyborg: "no"
 #enable_designate: "no"
 #enable_destroy_images: "no"
 #enable_elasticsearch: "{{ 'yes' if enable_central_logging | bool or enable_freezer | bool or enable_osprofiler | bool or enable_skydive | bool or enable_monasca | bool else 'no' }}"
@@ -235,16 +201,14 @@ enable_ceilometer: "yes"
 #enable_freezer: "no"
 enable_gnocchi: "yes"
 #enable_grafana: "no"
-#enable_heat: "{{ enable_openstack_core | bool }}"
+#enable_haproxy: "yes"
 enable_heat: "yes"
-#enable_horizon: "{{ enable_openstack_core | bool }}"
 enable_horizon: "yes"
 #enable_horizon_blazar: "{{ enable_blazar | bool }}"
 #enable_horizon_cloudkitty: "{{ enable_cloudkitty | bool }}"
 #enable_horizon_congress: "{{ enable_congress | bool }}"
 #enable_horizon_designate: "{{ enable_designate | bool }}"
 #enable_horizon_freezer: "{{ enable_freezer | bool }}"
-#enable_horizon_fwaas: "{{ enable_neutron_fwaas | bool }}"
 #enable_horizon_ironic: "{{ enable_ironic | bool }}"
 #enable_horizon_karbor: "{{ enable_karbor | bool }}"
 #enable_horizon_magnum: "{{ enable_magnum | bool }}"
@@ -263,7 +227,7 @@ enable_horizon: "yes"
 #enable_horizon_watcher: "{{ enable_watcher | bool }}"
 #enable_horizon_zun: "{{ enable_zun | bool }}"
 #enable_hyperv: "no"
-#enable_influxdb: "{{ enable_monasca | bool or (enable_cloudkitty | bool and cloudkitty_storage_backend == 'influxdb') }}"
+#enable_influxdb: "no"
 #enable_ironic: "no"
 #enable_ironic_ipxe: "no"
 #enable_ironic_neutron_agent: "no"
@@ -291,19 +255,16 @@ enable_mistral: "yes"
 #enable_neutron_vpnaas: "no"
 #enable_neutron_sriov: "no"
 enable_neutron_sfc: "yes"
-#enable_neutron_metering: "no"
 #enable_nova_fake: "no"
 #enable_nova_serialconsole_proxy: "no"
 #enable_nova_ssh: "yes"
 #enable_octavia: "no"
 #enable_onos: "no"
 #enable_opendaylight: "no"
-#enable_openstack_core: "yes"
-#enable_openvswitch: "{{ enable_neutron | bool and neutron_plugin_agent != 'linuxbridge' }}"
+#enable_openvswitch: "{{ neutron_plugin_agent != 'linuxbridge' }}"
 #enable_ovs_dpdk: "no"
 #enable_osprofiler: "no"
 #enable_panko: "no"
-#enable_placement: "{{ enable_nova }}"
 #enable_prometheus: "no"
 #enable_qdrouterd: "no"
 #enable_rally: "no"
@@ -323,7 +284,6 @@ enable_tacker: "yes"
 #enable_vitrage: "no"
 #enable_vmtp: "no"
 #enable_watcher: "no"
-#enable_xtrabackup: "no"
 #enable_zookeeper: "no"
 #enable_zun: "no"
 
@@ -386,7 +346,6 @@ enable_tacker: "yes"
 #glance_backend_file: "yes"
 #glance_backend_swift: "no"
 #glance_backend_vmware: "no"
-#enable_glance_image_cache: "no"
 # Configure glance upgrade option, due to this feature is experimental
 # in glance, so default value should be set to "no".
 glance_enable_rolling_upgrade: "no"
@@ -426,25 +385,12 @@ glance_enable_rolling_upgrade: "no"
 #cinder_backend_ceph: "{{ enable_ceph }}"
 #cinder_backend_vmwarevc_vmdk: "no"
 #cinder_volume_group: "cinder-volumes"
-# Valid options are [ '', redis, etcd ]
-#cinder_coordination_backend: "{{ 'redis' if enable_redis|bool else 'etcd' if enable_etcd|bool else '' }}"
 
 # Valid options are [ nfs, swift, ceph ]
 #cinder_backup_driver: "ceph"
 #cinder_backup_share: ""
 #cinder_backup_mount_options_nfs: ""
 
-#######################
-# Cloudkitty options
-#######################
-# Valid option is gnocchi
-#cloudkitty_collector_backend: "gnocchi"
-# Valid options are 'sqlalchemy' or 'influxdb'. The default value is
-# 'influxdb', which matches the default in Cloudkitty since the Stein release.
-# When the backend is "influxdb", we also enable Influxdb.
-# Also, when using 'influxdb' as the backend, we trigger the configuration/use
-# of Cloudkitty storage backend version 2.
-#cloudkitty_storage_backend: "influxdb"
 
 ###################
 # Designate options
@@ -464,21 +410,6 @@ glance_enable_rolling_upgrade: "no"
 # The number of fake driver per compute node
 #num_nova_fake_per_node: 5
 
-# Configure nova upgrade option, due to currently kolla support
-# two upgrade ways for nova: legacy_upgrade and rolling_upgrade
-# The variable "nova_enable_rolling_upgrade: yes" is meaning
-# rolling_upgrade were enabled and opposite
-#nova_enable_rolling_upgrade: "yes"
-
-# The flag "nova_safety_upgrade" need to be consider when
-# "nova_enable_rolling_upgrade" is enabled. The "nova_safety_upgrade"
-# controls whether the nova services are all stopped before rolling
-# upgrade to the new version, for the safety and availability.
-# If "nova_safety_upgrade" is "yes", that will stop all nova services (except
-# nova-compute) for no failed API operations before upgrade to the
-# new version. And opposite.
-#nova_safety_upgrade: "no"
-
 #################
 # Hyper-V options
 #################
@@ -497,8 +428,6 @@ glance_enable_rolling_upgrade: "no"
 #############################
 # Ironic options
 #############################
-# dnsmasq bind interface for Ironic Inspector, by default is network_interface
-#ironic_dnsmasq_interface: "{{ network_interface }}"
 # following value must be set when enable ironic, the value format
 # is "192.168.0.10,192.168.0.100".
 ironic_dnsmasq_dhcp_range:
@@ -507,7 +436,7 @@ ironic_dnsmasq_dhcp_range:
 
 # Configure ironic upgrade option, due to currently kolla support
 # two upgrade ways for ironic: legacy_upgrade and rolling_upgrade
-# The variable "ironic_enable_rolling_upgrade: yes" is meaning rolling_upgrade
+# The variable "ironic_enable_rolling_upgrade: yes" is meaning legacy_upgrade
 # were enabled and opposite
 # Rolling upgrade were enable by default
 #ironic_enable_rolling_upgrade: "yes"
@@ -543,13 +472,6 @@ ironic_dnsmasq_dhcp_range:
 # selected then swift_devices_name should specify a pattern which would match to
 # filesystems' labels prepared for swift.
 #swift_devices_name: "KOLLA_SWIFT_DATA"
-
-# Configure swift upgrade option, due to currently kolla support
-# two upgrade ways for swift: legacy_upgrade and rolling_upgrade
-# The variable "swift_enable_rolling_upgrade: yes" is meaning rolling_upgrade
-# were enabled and opposite
-# Rolling upgrade were enable by default
-#swift_enable_rolling_upgrade: "yes"
 
 
 ################################################
@@ -593,8 +515,3 @@ tempest_floating_network_name:
 #enable_prometheus_memcached: "{{ enable_prometheus | bool }}"
 #enable_prometheus_alertmanager: "{{ enable_prometheus | bool }}"
 #enable_prometheus_ceph_mgr_exporter: "{{ enable_prometheus | bool and enable_ceph | bool }}"
-#enable_prometheus_openstack_exporter: "{{ enable_prometheus | bool }}"
-#enable_prometheus_elasticsearch_exporter: "{{ enable_prometheus | bool and enable_elasticsearch | bool }}"
-
-# List of extra parameters passed to prometheus. You can add as many to the list.
-#prometheus_cmdline_extras:

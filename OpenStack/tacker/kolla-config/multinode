@@ -3,6 +3,7 @@
 [control]
 # These hostname must be resolvable from your deployment host
 controller1 neutron_external_interface=ens3 api_interface=eno1 network_interface=eno1 tunnel_interface=eno1 ansible_user=root
+
 # The above can also be specified as follows:
 #control[01:03]     ansible_user=kolla
 
@@ -11,8 +12,21 @@ controller1 neutron_external_interface=ens3 api_interface=eno1 network_interface
 [network]
 controller1 neutron_external_interface=ens3 api_interface=eno1 network_interface=eno1 tunnel_interface=eno1 ansible_user=root
 
-[compute]
+# inner-compute is the groups of compute nodes which do not have
+# external reachability.
+# DEPRECATED, the group will be removed in S release of OpenStack,
+# use variable neutron_compute_dvr_mode instead.
+[inner-compute]
+
+# external-compute is the groups of compute nodes which can reach
+# outside.
+# DEPRECATED, the group will be removed in S release of OpenStack,
+# use variable neutron_compute_dvr_mode instead.
+[external-compute]
 compute1 neutron_external_interface=ens3 api_interface=eno1 network_interface=eno1 tunnel_interface=eno1 ansible_user=root
+
+[compute:children]
+external-compute
 
 [monitoring]
 compute1 neutron_external_interface=ens3 api_interface=eno1 network_interface=eno1 tunnel_interface=eno1 ansible_user=root
@@ -56,6 +70,7 @@ monitoring
 
 [etcd:children]
 control
+compute
 
 [influxdb:children]
 monitoring
@@ -197,10 +212,6 @@ control
 [aodh:children]
 control
 
-[cyborg:children]
-control
-compute
-
 [congress:children]
 control
 
@@ -276,6 +287,9 @@ control
 [glance-api:children]
 glance
 
+[glance-registry:children]
+glance
+
 # Nova
 [nova-api:children]
 nova
@@ -321,9 +335,6 @@ neutron
 neutron
 
 [neutron-infoblox-ipam-agent:children]
-neutron
-
-[neutron-metering-agent:children]
 neutron
 
 [ironic-neutron-agent:children]
@@ -534,12 +545,6 @@ solum
 [solum-conductor:children]
 solum
 
-[solum-application-deployment:children]
-solum
-
-[solum-image-builder:children]
-solum
-
 # Mistral
 [mistral-api:children]
 mistral
@@ -550,9 +555,6 @@ mistral
 [mistral-engine:children]
 mistral
 
-[mistral-event-engine:children]
-mistral
-
 # Ceilometer
 [ceilometer-central:children]
 ceilometer
@@ -561,9 +563,6 @@ ceilometer
 ceilometer
 
 [ceilometer-compute:children]
-compute
-
-[ceilometer-ipmi:children]
 compute
 
 # Aodh
@@ -578,16 +577,6 @@ aodh
 
 [aodh-notifier:children]
 aodh
-
-# Cyborg
-[cyborg-api:children]
-cyborg
-
-[cyborg-agent:children]
-compute
-
-[cyborg-conductor:children]
-cyborg
 
 # Congress
 [congress-api:children]
@@ -726,6 +715,9 @@ vitrage
 [vitrage-graph:children]
 vitrage
 
+[vitrage-collector:children]
+vitrage
+
 [vitrage-ml:children]
 vitrage
 
@@ -762,9 +754,3 @@ storage
 
 [prometheus-alertmanager:children]
 monitoring
-
-[prometheus-openstack-exporter:children]
-monitoring
-
-[prometheus-elasticsearch-exporter:children]
-elasticsearch

@@ -205,7 +205,9 @@ $ kolla-ansible/tools/cleanup-host
 $ kolla-ansible/tools/cleanup-images
 
 #clean up containers and volumes in the cluster --all
-#需stop all container
+#需stop all container(Controller、Compute)
+$ docker stop $(docker ps -q)
+
 $ kolla-ansible/tools/kolla-ansible destroy  -i kolla-ansible/ansible/inventory/multinode --yes-i-really-really-mean-it
 ```
 
