@@ -1,4 +1,0 @@
-nsd:
-  net_src_port_id: d0f4f11e-d4e1-43fc-900d-d65533133f17
-  ip_dest_prefix: 10.20.0.2/24
-  net_dst_port_id: 3316010b-d7a2-4a8b-a80a-1a915066260f
