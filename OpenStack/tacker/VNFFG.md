@@ -1,15 +1,22 @@
 # VNFFG
 ## Table of Contents
+* [Create VIM](#create-vim)
+* [Create Network](#create-network)
+* [Create Security Groups](create-security-groups)
+* [Create Flavor](create-flavor)
+* [Create Key-name](#create-key-name)
 * [Create HTTP client and HTTP server](#create-http-client-and-http-server)
 * [取得Port ID](#取得port-id)
 * [tosca-vnffg-vnfd1](#tosca-vnffg-vnfd1)
 * [tosca-vnffg-vnfd2](#tosca-vnffg-vnfd2)
 * [tosca-vnffgd-sample](#tosca-vnffgd-sample)
-* [Create VNFFGD](#create-vnffgd)
 * [Create VNFD,VNF](#create-vnfdvnf)
+* [Create VNFFGD](#create-vnffgd)
 * [Create VNFFG](#create-vnffg)
 * [VNFFGD(共用)](#vnffgd共用)
+* [Viewing a VNFFG](#viewing-a-vnffg)
 * [Update VNFFG](#update-vnffg)
+* [常用指令](#常用指令)
 ## create VIM
 ```shell
 $ vim vim_config.yaml
@@ -26,15 +33,15 @@ cert_verify: 'False'
 $ openstack vim register --config-file vim_config.yaml \
        --description 'my first vim' --is-default hellovim
 ```
-## network
+## Create Network
 1. net_mgmt 10.20.0.0/24 10.20.0.254
 2. net0 10.30.0.0/24 10.30.0.254
 3. net1 10.40.0.0/24 10.40.0.254
-## security groups
+## Create Security Groups
 新增ICMP、TCP、UDP
-## flavor
+## Create Flavor
 1. m1.tiny VCPU:2 Mem:2048(MB) Disk:100(GB)
-## key-name
+## Create Key-name
 1. Add key-name 
 ## Create HTTP client and HTTP server
 ```shell

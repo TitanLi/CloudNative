@@ -4,7 +4,17 @@
 [Tacker基本操作](https://docs.openstack.org/tacker/latest/user/multisite_vim_usage_guide.html)
 
 ----
+## 參考資料
+[OpenStack SDN - NFV Management and Orchestration](https://networkop.co.uk/blog/2017/11/23/os-nfv-mano/)
 
+[TOSCA Simple Profile for Network Functions Virtualization (NFV) Version 1.0](http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/csd03/tosca-nfv-v1.0-csd03.html)
+
+[Tacker User Guide](https://docs.openstack.org/tacker/rocky/user/index.html)
+
+[tacker samples tosca-templates](https://github.com/openstack/tacker/tree/stable/stein/samples/tosca-templates)
+
+[networking-sfc](https://docs.openstack.org/networking-sfc/latest/contributor/ietf_sfc_encapsulation.html)
+----
 ## Table of Contents
 * [環境安裝](#環境安裝)
   - [Prepare initial configuration(globals)](#prepare-initial-configurationglobals)
