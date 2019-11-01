@@ -3,12 +3,16 @@
 
 ## Table of Contents
 * [密碼設定](#密碼設定)
+* [設定IP](#設定ip)
 * [格式化硬碟](#格式化硬碟)
-* [查看CPU的溫度](#查看CPU的溫度)
-* [CPU資訊](#CPU資訊)
+* [安裝](#安裝)
+  - [Mac](#mac)
+    - [dd](#dd)
+* [查看CPU的溫度](#查看cpu的溫度)
+* [CPU資訊](#cpu資訊)
 * [查看資源使用率](#查看資源使用率)
   - [Memory](#memory)
-  - [CPU](#CPU)
+  - [CPU](#cpu)
   - [高級工具](#高級工具)
 * [查看已使用的port](#查看已使用的port)
 * [問題解決](#問題解決)
@@ -31,6 +35,28 @@ PasswordAuthentication yes
 
 # 重啟ssh服務
 $ systemctl restart sshd.service
+```
+
+## 設定IP
+```shell
+$ vim /etc/network/interfaces
+auto eno1
+iface eno1 inet static # 固定 (靜態) IP
+address 192.168.2.99 # IP 位址
+netmask 255.255.254.0 # 網路遮罩
+gateway 192.168.3.254 # 預設閘道
+dns-nameservers 8.8.8.8 #DNS
+
+# 重開機
+# $ sudo /etc/init.d/networking restart
+$ sudo service network-manager restart
+```
+
+## 設定網路CLI
+```shell
+$ sudo ifconfig eno1 192.168.2.99 netmask 255.255.254.0
+$ sudo route add default gw 192.168.3.254 eno1
+$ route -n
 ```
 
 ## 格式化硬碟
@@ -57,6 +83,25 @@ Creating journal (32768 blocks): done
 Writing superblocks and filesystem accounting information: done
 ```
 
+## 安裝
+### Mac
+#### dd
+> 使用hdiutil指令將ISO檔轉為Mac的DMG檔
+```shell
+$ hdiutil convert -format UDRW -o ubuntu16.04 ubuntu-16.04.6-desktop-amd64.iso
+```
+> 列出disk列表
+```shell
+$ diskutil list
+```
+> 卸載USB
+```shell
+$ diskutil unmountDisk /dev/disk1
+```
+> 使用dd指令將ubuntu16.04.dmg寫入USB
+```shell
+$ sudo dd if=ubuntu16.04.dmg of=/dev/rdisk2 bs=1m
+```
 ## 查看CPU的溫度
 ```shell
 $ sudo apt-get install lm-sensors
