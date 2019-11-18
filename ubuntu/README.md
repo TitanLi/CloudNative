@@ -5,9 +5,11 @@
 * [密碼設定](#密碼設定)
 * [設定IP](#設定ip)
 * [格式化硬碟](#格式化硬碟)
+* [時間設定](#時間設定)
 * [安裝](#安裝)
   - [Mac](#mac)
     - [dd](#dd)
+    - [格式化](#格式化)
 * [查看CPU的溫度](#查看cpu的溫度)
 * [CPU資訊](#cpu資訊)
 * [查看資源使用率](#查看資源使用率)
@@ -48,6 +50,7 @@ gateway 192.168.3.254 # 預設閘道
 dns-nameservers 8.8.8.8 #DNS
 
 # 重開機
+# $ sudo apt install ifupdown
 # $ sudo /etc/init.d/networking restart
 $ sudo service network-manager restart
 ```
@@ -82,10 +85,15 @@ Writing inode tables: done
 Creating journal (32768 blocks): done
 Writing superblocks and filesystem accounting information: done
 ```
-
+## 時間設定
+```shell
+$ date
+$ timedatectl list-timezones
+$ sudo timedatectl set-timezone Asia/Taipei
+```
 ## 安裝
-### Mac
-#### dd
+### 1. Mac
+#### 1.1 dd
 > 使用hdiutil指令將ISO檔轉為Mac的DMG檔
 ```shell
 $ hdiutil convert -format UDRW -o ubuntu16.04 ubuntu-16.04.6-desktop-amd64.iso
@@ -96,11 +104,16 @@ $ diskutil list
 ```
 > 卸載USB
 ```shell
-$ diskutil unmountDisk /dev/disk1
+$ diskutil unmountDisk /dev/disk2
 ```
 > 使用dd指令將ubuntu16.04.dmg寫入USB
 ```shell
 $ sudo dd if=ubuntu16.04.dmg of=/dev/rdisk2 bs=1m
+```
+#### 1.2 格式化
+```shell
+$ diskutil list
+$ diskutil eraseDisk ExFAT titan /dev/disk2
 ```
 ## 查看CPU的溫度
 ```shell
