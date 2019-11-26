@@ -1,0 +1,51 @@
+tosca_definitions_version: tosca_simple_profile_for_nfv_1_0_0
+
+description: Demo example
+
+metadata:
+  template_name: sample-tosca-vnfd1
+
+topology_template:
+  node_templates:
+    VDU1:
+      type: tosca.nodes.nfv.VDU.Tacker
+      properties:
+        image: ubuntu
+        flavor: ds2G
+        availability_zone: nova
+        mgmt_driver: noop
+        key_name: Titan
+        config: |
+          param0: key1
+          param1: key2
+        user_data_format: RAW
+        user_data: |
+          #!/bin/sh
+          echo 1 > /proc/sys/net/ipv4/ip_forward
+    CP1:
+      type: tosca.nodes.nfv.CP.Tacker
+      properties:
+        management: true
+        order: 0
+        anti_spoofing_protection: false
+        ip_address: 10.10.0.11
+      requirements:
+        - virtualLink:
+            node: VL1
+        - virtualBinding:
+            node: VDU1
+            
+    VL1:
+      type: tosca.nodes.nfv.VL
+      properties:
+        network_name: net_mgmt
+        vendor: Tacker
+
+    FIP1:
+      type: tosca.nodes.network.FloatingIP
+      properties:
+        floating_network: public
+        floating_ip_address: 192.168.2.71
+      requirements:
+        - link:
+            node: CP1

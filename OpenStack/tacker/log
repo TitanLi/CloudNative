@@ -1,0 +1,46 @@
+1  vim /etc/hosts
+    2  vim /etc/resolv.conf 
+    3  sudo apt-get update
+    4  sudo apt-get install -y python-dev libffi-dev gcc libssl-dev python-selinux python-setuptools
+    5  sudo apt-get install -y python-pip
+    6  vim /root/.ssh/authorized_keys 
+    7  vim /etc/hosts
+    8  exit
+    9  docker stop $(docker ps -q)
+   10  exit
+   11  docker exec da135922c519 ovs-ofctl dump-flows br-int
+   12  docker ps
+   13  docker exec openvswitch_db ovs-ofctl dump-flows br-int
+   14  docker exec openvswitch_db ovs-vsctl show
+   15  docker exec openvswitch_db ovs-ofctl show br-int
+   16  docker exec openvswitch_db ovs-ofctl -O openflow13
+   17  docker exec openvswitch_db ovs-ofctl -O OpenFlow13 dump-groups
+   18  docker exec openvswitch_db ovs-ofctl -O OpenFlow13 dump-groups br-int
+   19  docker exec openvswitch_db ovs-ofctl dump-flows br-int
+
+
+   1  tcpdump
+    2  tcpdump -i ens4
+    3  route -n
+    4  route add -h
+    5  ip route add 10.30.0.0/24 dev ens4
+    6  route -n
+    7  ping 10.30.0.22
+    8  ip route add 10.30.0.23 dev ens4
+    9  route -n
+   10  tcpdump -i ens4
+   11  ifconfig
+   12  ip route add 10.30.0.22 dev ens4
+   13  tcpdump -i ens4
+   14  route -n
+   15  ip route del 10.30.0.23 dev ens4
+   16  route -n
+   17  ls /proc/sys/net/ipv4/
+   18  echo 1 > /proc/sys/net/ipv4/ip_forward
+   19  cat /proc/sys/net/ipv4/ip_forward
+   20  tcpdump -i ens4
+   21  sudo /etc/init.d/networking restart
+   22  tcpdump -i ens4
+   23  cat /proc/sys/net/ipv4/ip_forward
+   24  tcpdump -i ens4
+   25  history
