@@ -7,9 +7,9 @@
 * [格式化硬碟](#格式化硬碟)
 * [時間設定](#時間設定)
 * [安裝](#安裝)
-  - [Mac](#mac)
-    - [dd](#dd)
-    - [格式化](#格式化)
+  - [Mac](#1-mac)
+    - [dd](#11-dd)
+    - [格式化](#12-格式化)
 * [查看CPU的溫度](#查看cpu的溫度)
 * [CPU資訊](#cpu資訊)
 * [查看資源使用率](#查看資源使用率)
@@ -17,6 +17,9 @@
   - [CPU](#cpu)
   - [高級工具](#高級工具)
 * [查看已使用的port](#查看已使用的port)
+* [指令](#指令)
+  - [sed](#sed)
+  - [netstat-列出所有連接Port](#netstat-列出所有連接Port)
 * [問題解決](#問題解決)
   - [E: Sub-process /usr/bin/dpkg returned an error code](#e-sub-process-usrbindpkg-returned-an-error-code)
 ----
@@ -229,6 +232,16 @@ tcp        0      0 0.0.0.0:4369            0.0.0.0:*               LISTEN      
 tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      1528/sshd
 ```
 
+## 指令
+### sed
+> 將filename中abc取代為xyz
+```shell
+$ sed -i 's/abc/xyz/g' filename.txt
+```
+### netstat-列出所有連接Port
+```shell
+$ netstat -a
+```
 ## 問題解決
 ### E: Sub-process /usr/bin/dpkg returned an error code
 ```
