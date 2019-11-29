@@ -157,7 +157,7 @@ topology_template:
       type: tosca.nodes.network.FloatingIP
       properties:
         floating_network: public
-        floating_ip_address: 192.168.2.131
+        floating_ip_address: 192.168.2.111
       requirements:
         - link:
             node: CP11
