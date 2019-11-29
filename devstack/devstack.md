@@ -107,6 +107,7 @@ PIP_UPGRADE=Flase
 
 # Neutron options
 NEUTRON_CREATE_INITIAL_NETWORKS=False
+
 MULTI_HOST=1
 
 #---------------compute node common section
@@ -121,8 +122,6 @@ PUBLIC_INTERFACE=eno1
 FLAT_INTERFACE=ens3
 VNCSERVER_PROXYCLIENT_ADDRESS=$HOST_IP
 VNCSERVER_LISTEN=$HOST_IP
-
-MULTI_HOST=1
 ```
 
 ### 7. 開始安裝(controller node & compute node)
