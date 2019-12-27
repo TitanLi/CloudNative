@@ -20,6 +20,7 @@
 * [指令](#指令)
   - [sed](#sed)
   - [netstat-列出所有連接Port](#netstat-列出所有連接Port)
+* [Wake on LAN](#wake-on-lan)
 * [問題解決](#問題解決)
   - [E: Sub-process /usr/bin/dpkg returned an error code](#e-sub-process-usrbindpkg-returned-an-error-code)
 ----
@@ -242,6 +243,38 @@ $ sed -i 's/abc/xyz/g' filename.txt
 ```shell
 $ netstat -a
 ```
+
+## Wake on LAN
+> Ubuntu 18.04
+1. Install ethtool with
+```shell
+$ sudo apt-get install ethtool
+```
+2. Run the command
+```shell
+$ sudo ethtool -s eno1 wol g
+```
+3. On Ubuntu 18.04, you need to create a systemd service as opposed to enabling, creating and/or modifying rc.local as you would’ve done on previous versions. So, navigate to
+```shell
+$ cd /etc/systemd/system
+$ sudo vim wol.service
+[Unit]
+Description=Configure Wake-up on LAN
+
+[Service]
+Type=oneshot
+ExecStart=/sbin/ethtool -s eno1 wol g
+
+[Install]
+WantedBy=basic.target
+```
+4. Once you’ve created your file, you need to add it to the systemd services so you should run
+```shell
+$ systemctl daemon-reload
+$ systemctl enable wol.service
+$ systemctl start wol.service
+```
+
 ## 問題解決
 ### E: Sub-process /usr/bin/dpkg returned an error code
 ```
