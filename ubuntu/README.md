@@ -270,9 +270,9 @@ WantedBy=basic.target
 ```
 4. Once you’ve created your file, you need to add it to the systemd services so you should run
 ```shell
-$ systemctl daemon-reload
-$ systemctl enable wol.service
-$ systemctl start wol.service
+$ sudo systemctl daemon-reload
+$ sudo systemctl enable wol.service
+$ sudo systemctl start wol.service
 ```
 
 ## 問題解決
