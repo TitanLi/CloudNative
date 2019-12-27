@@ -230,3 +230,32 @@ $ sudo apt-get install python-pip
 $ sudo pip install --upgrade pip
 $ sudo pip install -U os-testr
 ```
+
+### 問題六
+### 問題
+```shell
+++::                                        curl -g -k --noproxy '*' -s -o /dev/null -w '%{http_code}' http://10.0.1.97/image
++::                                        [[ 503 == 503 ]]
+
+[ERROR] /opt/stack/devstack/lib/glance:353 g-api did not start
+```
+### 解決方法
+```shell
+$ ./unstack.sh
+$ ./clean.sh
+$ killall -u stack
+$ ./stack.sh
+```
+
+### 問題七：
+#### 錯誤訊息：
+```
+[ERROR] /opt/stack/devstack/inc/python:396 Can't find package octavia-lib in requirements
+```
+#### 解決方法：
+```
+$ sudo pip install octavia-lib
+$ vim /opt/stack/requirements/global-requirements.txt
+檢查是否有以下元件
+octavia-lib===1.1.0
+```
