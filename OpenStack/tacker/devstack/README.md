@@ -17,10 +17,10 @@ enable_plugin tacker https://git.openstack.org/openstack/tacker stable/rocky
 enable_plugin networking-sfc https://opendev.org/openstack/networking-sfc stable/rocky
 enable_plugin barbican https://opendev.org/openstack/barbican stable/rocky
 enable_plugin mistral https://opendev.org/openstack/mistral stable/rocky
-enable_plugin ceilometer https://opendev.org/openstack/ceilometer stable/rocky
 enable_plugin aodh https://opendev.org/openstack/aodh stable/rocky
 
-HOST_IP=192.168.2.95
+HOST_IP=192.168.2.99
+SERVICE_HOST=$HOST_IP
 GIT_BASE=https://github.com
 DATABASE_TYPE=mysql
 MYSQL_HOST=$SERVICE_HOST
@@ -54,7 +54,7 @@ PUBLIC_INTERFACE=eno1
 新增local.conf
 ```conf
 [[local|localrc]]
-SERVICE_HOST=192.168.2.95
+SERVICE_HOST=192.168.2.99
 GIT_BASE=https://github.com
 DATABASE_TYPE=mysql
 MYSQL_HOST=$SERVICE_HOST
@@ -84,13 +84,11 @@ NOVNCPROXY_URL="http://$SERVICE_HOST:6080/vnc_auto.html"
 
 
 #---------------compute node special section
-HOST_IP=192.168.2.98
+HOST_IP=192.168.2.96
 PUBLIC_INTERFACE=eno1
 FLAT_INTERFACE=ens3
 VNCSERVER_PROXYCLIENT_ADDRESS=$HOST_IP
 VNCSERVER_LISTEN=$HOST_IP
-
-MULTI_HOST=1
 ```
 
 ## 註冊VIM

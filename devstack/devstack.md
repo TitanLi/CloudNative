@@ -131,6 +131,7 @@ $ ./stack.sh
 
 ### 8. 發現運算節點(controller node)
 > 安裝完compute node後在controller node執行
+> flat network => public
 ```
 $ /opt/stack/devstack/tools/discover_hosts.sh
 ```
