@@ -1,3 +1,27 @@
+# Image
+[https://computingforgeeks.com/adding-images-openstack-glance/](https://computingforgeeks.com/adding-images-openstack-glance/)
+
+## Ubuntu 18.04
+```shell
+$ wget http://cloud-images.ubuntu.com/bionic/current/bionic-server-cloudimg-amd64.img
+
+$ openstack image create \
+    --container-format bare \
+    --disk-format qcow2 \
+    --file bionic-server-cloudimg-amd64.img \
+    Ubuntu-18.04
+```
+
+## Debian 9
+```shell
+$ wget http://cdimage.debian.org/cdimage/openstack/current-9/debian-9-openstack-amd64.qcow2
+$ openstack image create \
+    --container-format bare \
+    --disk-format qcow2 \
+    --file debian-9-openstack-amd64.qcow2 \
+    Debian-9
+```
+
 # Export Image
 ## Create a snapshot of the instance
 ```shell
