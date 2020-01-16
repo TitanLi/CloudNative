@@ -1,0 +1,12 @@
+# https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: frontend-scaler
+spec:
+  scaleTargetRef:
+    kind: ReplicaSet
+    name: frontend
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 50
