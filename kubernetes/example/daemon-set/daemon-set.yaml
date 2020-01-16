@@ -1,0 +1,21 @@
+# https://kubernetes.io/zh/docs/concepts/workloads/controllers/daemonset/
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: my-daemon-set
+  labels:
+    k8s-app: myapp-daemon-set
+spec:
+  selector:
+    matchLabels:
+      name: myapp-daemon-set
+  template:
+    metadata:
+      labels:
+        name: myapp-daemon-set
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+        ports:
+        - containerPort: 80
