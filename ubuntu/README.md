@@ -71,6 +71,7 @@ $ route -n
 
 ## Ubuntu 18.04
 ### DNS
+方法一：
 ```shell
 $ vim /etc/netplan/*.yaml
 network:
@@ -92,6 +93,9 @@ network:
 
 $ sudo netplan apply
 ```
+方法二：
+
+[https://jermine.vdo.pub/linux/ubuntu18.04%E4%BF%AE%E6%94%B9dns/](https://jermine.vdo.pub/linux/ubuntu18.04%E4%BF%AE%E6%94%B9dns/)
 
 ## 格式化硬碟
 ```shell
