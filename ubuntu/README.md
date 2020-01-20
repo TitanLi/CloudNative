@@ -4,6 +4,9 @@
 ## Table of Contents
 * [密碼設定](#密碼設定)
 * [設定IP](#設定ip)
+* [設定網路CLI](#設定網路cli)
+* [Ubuntu 18.04](#ubuntu-18.04)
+  - [DNS](#dns)
 * [格式化硬碟](#格式化硬碟)
 * [時間設定](#時間設定)
 * [安裝](#安裝)
@@ -64,6 +67,30 @@ $ sudo service network-manager restart
 $ sudo ifconfig eno1 192.168.2.99 netmask 255.255.254.0
 $ sudo route add default gw 192.168.3.254 eno1
 $ route -n
+```
+
+## Ubuntu 18.04
+### DNS
+```shell
+$ vim /etc/netplan/*.yaml
+network:
+    version: 2
+    ethernets:
+        eth0:
+            addresses:
+            - 123.123.123.123/20
+            - 10.0.0.0/16
+            gateway4: 123.123.123.1
+            match:
+                macaddress: cc:8c:11:e1:1b:81
+            nameservers:
+                addresses:
+                - 8.8.8.8
+                - 8.8.4.4
+                search: []
+            set-name: eth0
+
+$ sudo netplan apply
 ```
 
 ## 格式化硬碟
