@@ -6,7 +6,7 @@ $ git clone https://github.com/kubernetes-incubator/metrics-server
 ```
 
 2. 修改部分內容
-> 編輯metrics-server/deploy/1.8+/resource-reader.yaml
+> 編輯metrics-server/deploy/kubernetes/resource-reader.yaml
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -26,7 +26,7 @@ rules:
   - watch
 ```
 
-> 編輯metrics-server/deploy/1.8+/metrics-server-deployment.yaml
+> 編輯metrics-server/deploy/kubernetes/metrics-server-deployment.yaml
 ```yaml
 spec:
   selector:
@@ -53,7 +53,7 @@ spec:
 
 3. 開始部署
 ```shell
-$ kubectl apply -f metrics-server/deploy/1.8+/.
+$ kubectl apply -f metrics-server/deploy/kubernetes/.
 ```
 
 4. Metrics Server相關Pod、Service默認部署於kube-system的namespace
