@@ -38,11 +38,11 @@ $ service docker status
 ```
 
 ## 4. Install Kubernetes kubelet, kubeadm, kubectl (Master, Node)
->> 需更改DNS
+> 需更改DNS
 
->> vim /etc/resolv.conf
+> vim /etc/resolv.conf
 
->> nameserver 8.8.8.8
+> nameserver 8.8.8.8
 
 ```
 $ apt-get update && apt-get install -y apt-transport-https curl
