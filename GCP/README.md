@@ -54,3 +54,8 @@ $ gcloud compute ssh lisheng0706@web-app
 > 無
 9. 通訊協定和通訊埠(Protocols and ports)
 > 全部允許(Allow all)
+
+## Scp
+```shell
+$ gcloud compute scp lisheng0706@web-app:/home/lisheng0706/irc-demo/* ./irc-demo
+```
