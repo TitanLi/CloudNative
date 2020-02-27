@@ -92,11 +92,22 @@ network:
             set-name: eth0
 
 $ sudo netplan apply
+# 替换掉 systemd-resolved 生成的 resolv.conf 文件
+$ sudo rm /etc/resolv.conf
+$ sudo ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
 ```
 方法二：
 
 [https://jermine.vdo.pub/linux/ubuntu18.04%E4%BF%AE%E6%94%B9dns/](https://jermine.vdo.pub/linux/ubuntu18.04%E4%BF%AE%E6%94%B9dns/)
 
+方法三：
+```shell
+$ vim /etc/systemd/resolved.conf
+[Resolve]
+DNS=8.8.8.8
+
+$ sudo systemctl restart systemd-resolved
+```
 ## 格式化硬碟
 ```shell
 # 查看disk資訊
