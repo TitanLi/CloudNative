@@ -1,4 +1,5 @@
 # Metrics
+> metrics-server github:[https://github.com/kubernetes-sigs/metrics-server](https://github.com/kubernetes-sigs/metrics-server)
 ## 安裝Metrics Server
 1. 取得相關Yaml文件
 ```shell
@@ -85,4 +86,82 @@ kube-proxy-c85z8                 1m           10Mi
 kube-proxy-stxhg                 1m           10Mi            
 kube-scheduler-titan4            5m           12Mi            
 metrics-server-5bfdbd678-74mjm   1m           12Mi
+```
+
+## 透過API與metrics溝通
+> 此操作僅限localhost
+1. 加入proxy
+```shell
+$ kubectl proxy --address='0.0.0.0' --port=8080 --accept-hosts='^*$'&
+```
+2. kubectl top nodes
+```shell
+$ curl http://localhost:8080/apis/metrics.k8s.io/v1beta1/nodes
+{
+  "kind": "NodeMetricsList",
+  "apiVersion": "metrics.k8s.io/v1beta1",
+  "metadata": {
+    "selfLink": "/apis/metrics.k8s.io/v1beta1/nodes"
+  },
+  "items": [
+    {
+      "metadata": {
+        "name": "titan1",
+        "selfLink": "/apis/metrics.k8s.io/v1beta1/nodes/titan1",
+        "creationTimestamp": "2020-02-25T07:05:27Z"
+      },
+      "timestamp": "2020-02-25T07:05:17Z",
+      "window": "30s",
+      "usage": {
+        "cpu": "161437136n",
+        "memory": "2699144Ki"
+      }
+    },
+    {
+      "metadata": {
+        "name": "titan4",
+        "selfLink": "/apis/metrics.k8s.io/v1beta1/nodes/titan4",
+        "creationTimestamp": "2020-02-25T07:05:27Z"
+      },
+      "timestamp": "2020-02-25T07:05:20Z",
+      "window": "30s",
+      "usage": {
+        "cpu": "86024960n",
+        "memory": "1267124Ki"
+      }
+    }
+  ]
+}
+```
+3. kubectl top pods
+```shell
+$ curl http://localhost:8080/apis/metrics.k8s.io/v1beta1/namespaces/kube-system/pods 
+{
+  "kind": "PodMetricsList",
+  "apiVersion": "metrics.k8s.io/v1beta1",
+  "metadata": {
+    "selfLink": "/apis/metrics.k8s.io/v1beta1/namespaces/kube-system/pods"
+  },
+  "items": [
+    {
+      "metadata": {
+        "name": "metrics-server-75ff7565b5-4xptk",
+        "namespace": "kube-system",
+        "selfLink": "/apis/metrics.k8s.io/v1beta1/namespaces/kube-system/pods/metrics-server-75ff7565b5-4xptk",
+        "creationTimestamp": "2020-02-25T07:06:45Z"
+      },
+      "timestamp": "2020-02-25T07:06:14Z",
+      "window": "30s",
+      "containers": [
+        {
+          "name": "metrics-server",
+          "usage": {
+            "cpu": "1102036n",
+            "memory": "16784Ki"
+          }
+        }
+      ]
+    },
+    ....
+}
 ```

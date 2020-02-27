@@ -1,5 +1,8 @@
 # API Server
-> NodeJS API Server使用Kubernetes Deployment運行
+官方Deployment文件：[https://kubernetes.io/zh/docs/concepts/workloads/controllers/deployment/](https://kubernetes.io/zh/docs/concepts/workloads/controllers/deployment/)
+
+> Deployment、Service範例<br>
+> NodeJS API Server使用Kubernetes Deployment運行<br>
 > 使用Service將Port對外
 ## Docker Build
 ```shell
@@ -57,7 +60,7 @@ metadata:
     name: api-service # 服務名稱
 spec:
   selector:
-    app: api # 找到對應的Pod
+    app: api # 找到對應label資訊的Pod
   ports:
   - name: http-api  # 讓維運人員讀取
     protocol: TCP
