@@ -78,3 +78,41 @@ $ kubectl -n deployment-test apply -f api-deployment.yaml
 ```shell
 $ kubectl proxy --address='0.0.0.0' --port=8080 --accept-hosts='^*$'&
 ```
+## kubectl port-forward
+```shell
+# Listen on ports 5000 and 6000 locally, forwarding data to/from ports 5000 and 6000 in the pod
+$ kubectl port-forward --address=0.0.0.0 mypod 5000 6000
+
+# Listen on port 8888 locally, forwarding to 5000 in the pod
+$ kubectl port-forward --address=0.0.0.0 mypod 8888:5000
+
+# Listen on a random port locally, forwarding to 5000 in the pod
+$ kubectl port-forward --address=0.0.0.0 mypod :5000
+
+# Listen on a random port locally, forwarding to 5000 in the pod
+$ kubectl port-forward --address=0.0.0.0 mypod 0:5000
+
+# Forward to deployment
+$ kubectl port-forward --address=0.0.0.0 deployment/redis-master 6379:6379
+
+# Forward to replicaSet
+$ kubectl port-forward --address=0.0.0.0 rs/redis-master 6379:6379
+
+# Forward to service
+$ kubectl port-forward --address=0.0.0.0 svc/redis-master 6379:6379
+```
+## kubectl exec
+```shell
+$ kubectl exec -ti mypod bash
+```
+## kubectl logs
+```shell
+# Pod
+# -f streaming
+$ kubectl logs api-deployment-77b4949674-j5zv6
+
+# Deployment
+# -c container
+# -f streaming
+$ kubectl logs deployment/api-deployment -c nodejs-api-app -f
+```
