@@ -53,3 +53,5 @@ scrape_configs:
 ## query
 1. 取的Memory總量
 > node_memory_MemTotal_bytes
+2. 取得Swap總量
+> node_memory_SwapTotal_bytes
