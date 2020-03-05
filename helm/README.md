@@ -25,3 +25,25 @@ $ helm init --service-account tiller
 $ kubectl get pods --namespace kube-system
 tiller-deploy-5b4685ffbf-n4n7p          1/1     Running   0          14m
 ```
+## Get the latest information
+```shell
+$ helm repo up
+```
+## Search for available versions for a given stable
+```shell
+$ helm search stable/prometheus-operator --versions --version=">=4.3" --col-width=20
+```
+## Install
+```shell
+$ helm install stable/prometheus-operator --version=4.3.6 --name=monitoring --namespace=monitoring
+```
+## List
+```shell
+$ helm list
+NAME      	REVISION	UPDATED                 	STATUS  	CHART            	APP VERSION	NAMESPACE 
+prometheus	1       	Thu Mar  5 05:34:47 2020	DEPLOYED	prometheus-11.0.1	2.16.0     	monitoring
+```
+## Delete
+```shell
+$ helm delete prometheus
+```
