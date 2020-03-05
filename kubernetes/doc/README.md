@@ -116,3 +116,8 @@ $ kubectl logs api-deployment-77b4949674-j5zv6
 # -f streaming
 $ kubectl logs deployment/api-deployment -c nodejs-api-app -f
 ```
+
+## CRD
+```shell
+$ kubectl get crd --all-namespaces
+```
