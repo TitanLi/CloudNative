@@ -29,8 +29,19 @@ tiller-deploy-5b4685ffbf-n4n7p          1/1     Running   0          14m
 $ helm repo up
 ```
 ## Install the stable/prometheus-operator
+> 執行會稍微久一些，要等一下 <br>
+> 可用以下命令觀察部署狀態 <br>
+> $ watch kubectl get pod --namespace=monitoring
 ```shell
 $ helm install stable/prometheus-operator --name=monitoring --namespace=monitoring
+
+....
+NOTES:
+The Prometheus Operator has been installed. Check its status by running:
+  kubectl --namespace monitoring get pods -l "release=monitoring"
+
+Visit https://github.com/coreos/prometheus-operator for instructions on how
+to create & configure Alertmanager and Prometheus instances using the Operator.
 ```
 ## Get service
 ```shell
