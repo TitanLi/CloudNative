@@ -50,3 +50,6 @@ scrape_configs:
     static_configs:
     - targets: ['192.168.2.95:9100']
 ```
+## query
+1. 取的Memory總量
+> node_memory_MemTotal_bytes
