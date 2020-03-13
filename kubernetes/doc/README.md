@@ -75,6 +75,8 @@ $ kubectl create namespace deployment-test
 $ kubectl -n deployment-test apply -f api-deployment.yaml 
 ```
 ## 開啟proxy
+> 用於連結apiserver <br>
+> default port : 8001
 ```shell
 $ kubectl proxy --address='0.0.0.0' --port=8080 --accept-hosts='^*$'&
 ```
