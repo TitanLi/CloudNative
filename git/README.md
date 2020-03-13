@@ -31,3 +31,8 @@ $ git reflog
 ```shell
 $ git reset --hard commit_id
 ```
+
+## 同步
+```shell
+$ git pull origin <branch-name>
+```
