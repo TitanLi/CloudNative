@@ -1,4 +1,5 @@
 # Helm
+Source : [https://github.com/helm/charts/tree/master/stable/prometheus-operator](https://github.com/helm/charts/tree/master/stable/prometheus-operator)
 ## Installing Helm
 ```shell
 $ cd /tmp
@@ -57,7 +58,15 @@ monitoring-prometheus-oper-prometheus     ClusterIP   10.100.165.113   <none>   
 prometheus-operated                       ClusterIP   None             <none>        9090/TCP                     18m
 ```
 ## Port-forward
-> prometheus dashboard
+> prometheus dashboard <br>
+> [http://192.168.2.96:9090](http://192.168.2.96:9090)
 ```shell
 $ kubectl port-forward --address=0.0.0.0 svc/monitoring-prometheus-oper-prometheus 9090:9090 --namespace=monitoring
+```
+> grafana dashboard <br>
+> [http://192.168.2.96/](http://192.168.2.96/) <br>
+> user : admin <br>
+> password : prom-operator
+```shell
+$ kubectl port-forward --address=0.0.0.0 svc/monitoring-grafana 80:80 --namespace=monitoring
 ```

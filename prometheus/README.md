@@ -1,4 +1,5 @@
 # Prometheus
+> 官方網站：[https://prometheus.io/docs/introduction/overview/](https://prometheus.io/docs/introduction/overview/)
 ## 下載Prometheus
 [https://prometheus.io/download](https://prometheus.io/download)
 ## 解壓縮
