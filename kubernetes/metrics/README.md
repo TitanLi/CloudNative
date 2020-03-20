@@ -3,11 +3,11 @@
 ## 安裝Metrics Server
 1. 取得相關Yaml文件
 ```shell
-$ git clone https://github.com/kubernetes-incubator/metrics-server
+$ git clone https://github.com/kubernetes-incubator/metrics-server -b release-0.3
 ```
 
 2. 修改部分內容
-> 編輯metrics-server/deploy/kubernetes/resource-reader.yaml
+> 編輯metrics-server/deploy/1.8+/resource-reader.yaml 
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -27,7 +27,7 @@ rules:
   - watch
 ```
 
-> 編輯metrics-server/deploy/kubernetes/metrics-server-deployment.yaml
+> 編輯metrics-server/deploy/1.8+/metrics-server-deployment.yaml
 ```yaml
 spec:
   selector:
@@ -47,14 +47,18 @@ spec:
       containers:
       - name: metrics-server
         image: k8s.gcr.io/metrics-server-amd64:v0.3.6
-        command:                                        # 增加此行
-          - /metrics-server                             # 增加此行
-          - --kubelet-insecure-tls                      # 增加此行
+        imagePullPolicy: Always
+        args:                                                                 # 增加此行
+        - --kubelet-insecure-tls                                              # 增加此行
+        - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname    # 增加此行
+        volumeMounts:
+        - name: tmp-dir
+          mountPath: /tmp
 ```
 
 3. 開始部署
 ```shell
-$ kubectl apply -f metrics-server/deploy/kubernetes/.
+$ kubectl apply -f metrics-server/deploy/1.8+/
 ```
 
 4. Metrics Server相關Pod、Service默認部署於kube-system的namespace
@@ -67,6 +71,7 @@ metrics-server   ClusterIP   10.108.56.144   <none>        443/TCP              
 ```
 
 5. 使用服務
+> 需等一下
 ```shell
 $ kubectl top nodes
 NAME     CPU(cores)   CPU%   MEMORY(bytes)   MEMORY%   
