@@ -1,4 +1,6 @@
 # Helm
+> 官方教學：[https://helm.sh/docs/intro/quickstart/](https://helm.sh/docs/intro/quickstart/) <br>
+> Helm Commands：[https://helm.sh/docs/helm/](https://helm.sh/docs/helm/) <br>
 > 參考資料：[https://www.digitalocean.com/community/tutorials/how-to-install-software-on-kubernetes-clusters-with-the-helm-package-manager](https://www.digitalocean.com/community/tutorials/how-to-install-software-on-kubernetes-clusters-with-the-helm-package-manager)
 ## Installing Helm
 ```shell
