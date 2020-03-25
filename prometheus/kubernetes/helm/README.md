@@ -29,6 +29,15 @@ $ helm init --service-account tiller
 $ kubectl get pods --namespace kube-system
 tiller-deploy-5b4685ffbf-n4n7p          1/1     Running   0          14m
 ```
+## Add the stable repository
+```shell
+$ helm repo add stable https://kubernetes-charts.storage.googleapis.com
+"stable" has been added to your repositories
+
+$ $ helm repo list
+NAME    URL
+stable  https://kubernetes-charts.storage.googleapis.com
+```
 ## Get the latest information
 ```shell
 $ helm repo up
@@ -107,7 +116,7 @@ $ helm repo update
 ```
 ## The full name for the chart is stable/prometheus-operator. You can inspect the chart for more information
 ```shell
-helm show readme stable/prometheus-operator
+$ helm show readme stable/prometheus-operator
 ```
 ## Install the stable/prometheus-operator
 > 執行會稍微久一些，要等一下 <br>
