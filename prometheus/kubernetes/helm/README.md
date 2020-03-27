@@ -152,5 +152,13 @@ $ kubectl port-forward --address=0.0.0.0 svc/prometheus-operator-158503-promethe
 ```shell
 $ kubectl port-forward --address=0.0.0.0 svc/prometheus-operator-1585033539-grafana 80:80 --namespace=monitoring
 ```
+## 進階應用
+### grafana圖片下載
 > 圖片標題 -> Share -> Direct link rendered image -> 複製URL <br>
 > 下載grafana dashboard圖片：curl 'http://admin:prom-operator@192.168.2.96/render/d-solo/a87fb0d919ec0ea5f6543124e16c42a5/kubernetes-compute-resources-namespace-workloads?orgId=1&refresh=10s&from=1585196236814&to=1585196536814&var-datasource=Prometheus&var-cluster=&var-namespace=monitoring&var-interval=4h&var-type=deployment&panelId=2&width=1000&height=500&tz=Asia%2FTaipei' -o Desktop/a.png
+
+### Prometheus API
+> API Doc:[https://prometheus.io/docs/prometheus/latest/querying/api/#range-queries](https://prometheus.io/docs/prometheus/latest/querying/api/#range-queries)
+```shell
+$ curl 192.168.2.96:9090/api/v1/query_range?query=sum(irate(container_network_receive_bytes_total{namespace=~"kube-system"}[4h:5m])) by (pod)&start=1585212105&end=1585212405&step=15
+```
