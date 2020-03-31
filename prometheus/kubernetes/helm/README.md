@@ -143,7 +143,7 @@ prometheus-operator-1585033539-prometheus-node-exporter   ClusterIP   10.110.54.
 > prometheus dashboard <br>
 > [http://192.168.2.96:9090](http://192.168.2.96:9090)
 ```shell
-$ kubectl port-forward --address=0.0.0.0 svc/prometheus-operator-158503-prometheus9090:9090 --namespace=monitoring
+$ kubectl port-forward --address=0.0.0.0 svc/prometheus-operator-158503-prometheus 9090:9090 --namespace=monitoring
 ```
 > grafana dashboard <br>
 > [http://192.168.2.96/](http://192.168.2.96/) <br>
