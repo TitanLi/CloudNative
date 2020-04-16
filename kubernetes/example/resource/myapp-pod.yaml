@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp-pod
+  labels:
+    app: myapp
+spec:
+  containers:
+  - name: myapp-container
+    image: nginx
+    resources:
+      requests:
+        memory: "32Mi" # 單位Bytes
+        cpu: "125m" # 絕對vCPU數量，例如8 vCPU主機，上方部署的Pod總合不能超過8，m代表毫，千分之一
+      limits:
+        memory: "64Mi"
+        cpu: "250m"
