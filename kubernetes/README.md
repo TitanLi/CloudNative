@@ -100,3 +100,8 @@ $ kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Docum
 ```
 $ watch kubectl get node
 ```
+
+## Uninstall
+```shell
+$ kubeadm reset
+```

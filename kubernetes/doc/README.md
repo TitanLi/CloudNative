@@ -123,3 +123,18 @@ $ kubectl logs deployment/api-deployment -c nodejs-api-app -f
 ```shell
 $ kubectl get crd --all-namespaces
 ```
+
+## taint
+> 包括Key、Value、Effect三個部分 <br>
+> Effect：共有三種，分別是 NoSchedule, PreferNoSchedule & NoExecute
+```shell
+# 不讓Pod部署到titan5 node上
+$ kubectl taint nodes titan5 key=value:NoSchedule
+
+# 查看taint
+$ apt install jq
+$ kubectl get nodes -o json | jq '.items[].spec.taints'
+
+# 移除taint
+$ kubectl taint nodes titan5 key:NoSchedule-
+```
