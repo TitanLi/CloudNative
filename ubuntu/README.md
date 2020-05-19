@@ -24,6 +24,7 @@
   - [sed](#sed)
   - [netstat-列出所有連接Port](#netstat-列出所有連接Port)
 * [Wake on LAN](#wake-on-lan)
+* [remove cloud-init](#remove-cloud-init)
 * [問題解決](#問題解決)
   - [E: Sub-process /usr/bin/dpkg returned an error code](#e-sub-process-usrbindpkg-returned-an-error-code)
 ----
@@ -316,7 +317,14 @@ $ sudo systemctl daemon-reload
 $ sudo systemctl enable wol.service
 $ sudo systemctl start wol.service
 ```
-
+## remove cloud-init
+> Ubuntu 18.04
+```shell
+$ echo 'datasource_list: [ None ]' | sudo -s tee /etc/cloud/cloud.cfg.d/90_dpkg.cfg
+$ sudo apt-get purge cloud-init
+$ sudo rm -rf /etc/cloud/; sudo rm -rf /var/lib/cloud/
+$ reboot
+```
 ## 問題解決
 ### E: Sub-process /usr/bin/dpkg returned an error code
 ```
