@@ -12,14 +12,22 @@ $ sudo systemctl restart systemd-resolved
 新增local.conf
 ```conf
 [[local|localrc]]
+enable_plugin nova https://opendev.org/openstack/nova stable/rocky
+enable_plugin keystone https://opendev.org/openstack/keystone stable/rocky
+enable_plugin neutron https://opendev.org/openstack/neutron stable/rocky
+enable_plugin cinder https://opendev.org/openstack/cinder stable/rocky
+enable_plugin glance  https://opendev.org/openstack/glance stable/rocky
 enable_plugin heat https://git.openstack.org/openstack/heat stable/rocky
-enable_plugin tacker https://git.openstack.org/openstack/tacker stable/rocky
-enable_plugin networking-sfc https://opendev.org/openstack/networking-sfc stable/rocky
 enable_plugin barbican https://opendev.org/openstack/barbican stable/rocky
-enable_plugin mistral https://opendev.org/openstack/mistral stable/rocky
 enable_plugin aodh https://opendev.org/openstack/aodh stable/rocky
+enable_plugin horizon https://opendev.org/openstack/horizon stable/rocky
+enable_plugin tacker https://git.openstack.org/openstack/tacker stable/rocky
+enable_plugin tacker-horizon https://opendev.org/openstack/tacker-horizon stable/rocky
+enable_plugin networking-sfc https://opendev.org/openstack/networking-sfc stable/rocky
+enable_plugin mistral https://opendev.org/openstack/mistral stable/rocky
+enable_plugin mistral-dashboard https://opendev.org/openstack/mistral-dashboard stable/rocky
 
-HOST_IP=192.168.2.99
+HOST_IP=192.168.2.98
 SERVICE_HOST=$HOST_IP
 GIT_BASE=https://github.com
 DATABASE_TYPE=mysql
@@ -54,7 +62,7 @@ PUBLIC_INTERFACE=eno1
 新增local.conf
 ```conf
 [[local|localrc]]
-SERVICE_HOST=192.168.2.99
+SERVICE_HOST=192.168.2.98
 GIT_BASE=https://github.com
 DATABASE_TYPE=mysql
 MYSQL_HOST=$SERVICE_HOST
