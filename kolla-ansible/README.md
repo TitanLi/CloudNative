@@ -34,8 +34,8 @@ if __name__ == '__main__':
 ## 加入ssh key
 master、node
 ```shell
-root@titan1:/home/ubuntu# ssh-keygen
-root@titan1:/home/ubuntu# cat /root/.ssh/id_rsa.pub
+ubuntu@titan1:/home/ubuntu# ssh-keygen
+ubuntu@titan1:/home/ubuntu# cat .ssh/id_rsa.pub
 root@titan1:/home/ubuntu# vim /root/.ssh/authorized_keys
 root@titan2:/home/ubuntu# vim /root/.ssh/authorized_keys
 ```
@@ -137,8 +137,8 @@ compute1 neutron_external_interface=ens3 api_interface=eno1 network_interface=en
 [deployment]
 controller1       ansible_connection=local
 
-$ ansible -i kolla-ansible/ansible/inventory/multinode all -m ping
-$ ansible -i kolla-ansible/ansible/inventory/multinode all -m raw -a "apt-get -y install python-dev"
+$ sudo ansible -i kolla-ansible/ansible/inventory/multinode all -m ping
+$ sudo ansible -i kolla-ansible/ansible/inventory/multinode all -m raw -a "apt-get -y install python-dev"
 ```
 
 ## Prepare initial configuration(globals)
@@ -155,9 +155,9 @@ keepalived_virtual_router_id: "96"
 #enable_cinder: "yes"
 #enable_cinder_backend_lvm: "yes"
 
-$ kolla-ansible/tools/kolla-ansible -i kolla-ansible/ansible/inventory/multinode bootstrap-servers
-$ kolla-ansible/tools/kolla-ansible -i kolla-ansible/ansible/inventory/multinode prechecks
-$ kolla-ansible/tools/kolla-ansible -i kolla-ansible/ansible/inventory/multinode deploy
+$ sudo kolla-ansible/tools/kolla-ansible -i kolla-ansible/ansible/inventory/multinode bootstrap-servers
+$ sudo kolla-ansible/tools/kolla-ansible -i kolla-ansible/ansible/inventory/multinode prechecks
+$ sudo kolla-ansible/tools/kolla-ansible -i kolla-ansible/ansible/inventory/multinode deploy
 ```
 
 ## Use OpenStack
