@@ -3,10 +3,14 @@
 
 ## Table of Contents
 * [密碼設定](#密碼設定)
+* [Ubuntu sudo NoPassWD 不用輸入密碼設定](#ubuntu-sudo-noPasswd-不用輸入密碼設定)
 * [設定IP](#設定ip)
+* [package list](#package-list)
 * [設定網路CLI](#設定網路cli)
+* [修改網卡名稱](#修改網卡名稱)
 * [Ubuntu 18.04](#ubuntu-1804)
   - [DNS](#dns)
+  - [host rename](#host-rename)
 * [格式化硬碟](#格式化硬碟)
 * [時間設定](#時間設定)
 * [安裝](#安裝)
@@ -23,11 +27,15 @@
 * [指令](#指令)
   - [sed](#sed)
   - [netstat-列出所有連接Port](#netstat-列出所有連接Port)
+  - [telnet測試IP](#telnet測試IP)
+  - [VM新增Remote Tunnel](#VM新增Remote-Tunnel)
+  - [iptables VM封包轉發](#iptables-VM封包轉發)
+* [iptables指令](#iptables指令)
 * [Wake on LAN](#wake-on-lan)
 * [remove cloud-init](#remove-cloud-init)
+* [誤刪/etc/fstab](#誤刪/etc/fstab)
 * [問題解決](#問題解決)
   - [E: Sub-process /usr/bin/dpkg returned an error code](#e-sub-process-usrbindpkg-returned-an-error-code)
-----
 
 ## 密碼設定
 ```shell
@@ -47,6 +55,15 @@ PasswordAuthentication yes
 $ systemctl restart sshd.service
 ```
 
+## Ubuntu sudo NoPassWD 不用輸入密碼設定
+```
+$ sudo visudo
+將
+%sudo   ALL=(ALL:ALL) ALL
+改成
+%sudo   ALL=(ALL:ALL) NOPASSWD:ALL
+```
+
 ## 設定IP
 ```shell
 $ vim /etc/network/interfaces
@@ -63,11 +80,38 @@ dns-nameservers 8.8.8.8 #DNS
 $ sudo service network-manager restart
 ```
 
+## package list
+```shell
+$ apt list -a <package name>
+```
+
 ## 設定網路CLI
 ```shell
 $ sudo ifconfig eno1 192.168.2.99 netmask 255.255.254.0
 $ sudo route add default gw 192.168.3.254 eno1
 $ route -n
+```
+
+## 修改網卡名稱
+```shell
+$ vi /etc/default/grub
+GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+GRUB_CMDLINE_LINUX="net.ifnames=0 biosdevname=0"
+
+# 更新grub
+$ grub-mkconfig -o /boot/grub/grub.cfg
+
+# 編輯網卡名稱
+$ vim /etc/netplan/00-installer-config.yaml
+network:
+  ethernets:
+    eth0:
+      addresses:
+      - 192.168.122.101/24
+      gateway4: 192.168.122.1
+  version: 2
+$ sudo netplan apply
+$ sudo init 6
 ```
 
 ## Ubuntu 18.04
@@ -109,6 +153,14 @@ DNS=8.8.8.8
 
 $ sudo systemctl restart systemd-resolved
 ```
+
+### host rename
+```shell
+$ vim /etc/hostname
+$ vim /etc/hosts
+$ sudo init 6
+```
+
 ## 格式化硬碟
 ```shell
 # 查看disk資訊
@@ -247,6 +299,12 @@ clflush size	: 64
 cache_alignment	: 64
 address sizes	: 39 bits physical, 48 bits virtual
 power management:
+
+#邏輯CPU個數
+$ cat /proc/cpuinfo | grep "processor" | wc -l
+
+#物理CPU個數：
+$ cat /proc/cpuinfo | grep "physical id" | sort | uniq | wc -l
 ```
 
 ## 查看資源使用率
@@ -276,6 +334,10 @@ tcp        0      0 0.0.0.0:4369            0.0.0.0:*               LISTEN      
 tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      1528/sshd
 ```
 
+```shell
+$ netstat -nlpt | grep
+```
+
 ## 指令
 ### sed
 > 將filename中abc取代為xyz
@@ -285,6 +347,85 @@ $ sed -i 's/abc/xyz/g' filename.txt
 ### netstat-列出所有連接Port
 ```shell
 $ netstat -a
+# 本地port狀態
+$ netstat -tnl
+```
+### telnet測試IP
+```shell
+$ telnet 127.0.0.1
+```
+### VM新增Remote Tunnel
+> [https://linuxize.com/post/how-to-setup-ssh-tunneling/](https://linuxize.com/post/how-to-setup-ssh-tunneling/)
+
+### iptables VM封包轉發
+參考資料:
+> [https://aboullaite.me/kvm-qemo-forward-ports-with-iptables/](https://aboullaite.me/kvm-qemo-forward-ports-with-iptables/)
+> [https://linadonis.pixnet.net/blog/post/32506940](https://linadonis.pixnet.net/blog/post/32506940)
+```shell
+$ virsh net-list
+ Name                 State      Autostart     Persistent
+----------------------------------------------------------
+ default              active     yes           yes
+
+$ virsh net-dumpxml default
+<network connections='4'>
+  <name>default</name>
+  <uuid>69b6304a-dcc4-4a89-9dca-ca5f32a0b3d2</uuid>
+  <forward mode='nat'>
+    <nat>
+      <port start='1024' end='65535'/>
+    </nat>
+  </forward>
+  <bridge name='virbr0' stp='on' delay='0'/>
+  <mac address='52:54:00:e8:d7:fd'/>
+  <ip address='192.168.122.1' netmask='255.255.255.0'>
+    <dhcp>
+      <range start='192.168.122.2' end='192.168.122.254'/>
+    </dhcp>
+  </ip>
+</network>
+
+$ iptables -I FORWARD -o virbr0 -d  192.168.122.17 -j ACCEPT
+root@monitor-server:/home/ubuntu# iptables -L -v -n | more
+Chain INPUT (policy ACCEPT 45 packets, 75456 bytes)
+ pkts bytes target     prot opt in     out     source               destination
+  665 48936 ACCEPT     udp  --  virbr0 *       0.0.0.0/0            0.0.0.0/0            udp dpt:53
+    0     0 ACCEPT     tcp  --  virbr0 *       0.0.0.0/0            0.0.0.0/0            tcp dpt:53
+  750  238K ACCEPT     udp  --  virbr0 *       0.0.0.0/0            0.0.0.0/0            udp dpt:67
+    0     0 ACCEPT     tcp  --  virbr0 *       0.0.0.0/0            0.0.0.0/0            tcp dpt:67
+
+Chain FORWARD (policy ACCEPT 0 packets, 0 bytes)
+ pkts bytes target     prot opt in     out     source               destination
+    1   156 ACCEPT     all  --  *      virbr0  0.0.0.0/0            192.168.122.17
+1101K   12G ACCEPT     all  --  *      virbr0  0.0.0.0/0            192.168.122.0/24     ctstate RELATED,ESTABLISHED
+1087K   69M ACCEPT     all  --  virbr0 *       192.168.122.0/24     0.0.0.0/0
+    0     0 ACCEPT     all  --  virbr0 virbr0  0.0.0.0/0            0.0.0.0/0
+  319 16588 REJECT     all  --  *      virbr0  0.0.0.0/0            0.0.0.0/0            reject-with icmp-port-unreachable
+    0     0 REJECT     all  --  virbr0 *       0.0.0.0/0            0.0.0.0/0            reject-with icmp-port-unreachable
+
+Chain OUTPUT (policy ACCEPT 35 packets, 149K bytes)
+ pkts bytes target     prot opt in     out     source               destination
+  750  247K ACCEPT     udp  --  *      virbr0  0.0.0.0/0            0.0.0.0/0            udp dpt:68
+
+$ iptables -t nat -A PREROUTING -p tcp -i eth0 --dport 3000 -j DNAT --to-destination 192.168.122.17:3000
+$ iptables -A INPUT -i eth0 -p tcp --dport 3000 -j ACCEPT
+
+```
+
+```shell
+# ssh 服務器偵聽端口8080，並將所有流量從此端口隧道傳輸到端口上的本地計算機3000
+$ ssh -R 8080:127.0.0.1:3000 -N -f user@remote.host
+```
+
+## iptables指令
+### 列出所有規則，前面加上行號
+```shell
+$ iptables -L INPUT -n --line-numbers
+```
+
+### 刪除某一行的規則
+```shell
+$ iptables -D INPUT {預計刪除規則行數1}
 ```
 
 ## Wake on LAN
@@ -325,6 +466,14 @@ $ sudo apt-get purge cloud-init
 $ sudo rm -rf /etc/cloud/; sudo rm -rf /var/lib/cloud/
 $ reboot
 ```
+
+## 誤刪/etc/fstab
+```
+$ mount -o remount rw /
+$ 更改回去
+$ sudo init 6
+```
+
 ## 問題解決
 ### E: Sub-process /usr/bin/dpkg returned an error code
 ```

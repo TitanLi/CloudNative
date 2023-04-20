@@ -62,7 +62,9 @@ $ swapoff -a
 ```
 
 ## 5. Initializing your master and create a cluster (Master)
-```
+```shell
+# 忽略錯誤--ignore-preflight-errors=all
+# 指定版本--kubernetes-version=v1.10.0
 $ kubeadm init --pod-network-cidr=10.244.0.0/16
 ```
 
@@ -101,7 +103,26 @@ $ kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Docum
 $ watch kubectl get node
 ```
 
+## 10. 讓k8s可以在開機自動啟動
+```
+$ swapoff -a
+$ vi /etc/fstab
+# 註解
+/dev/mapper/centos-swap swap swap default 0 0
+$ sudo init 6
+```
+
+## 11. 自定義k8s nodeport範圍
+```shell
+$ vim /etc/kubernetes/manifests/kube-apiserver.yaml
+# 在這行下新增--service-cluster-ip-range
+- --service-node-port-range=1-65535
+$ systemctl daemon-reload
+$ systemctl restart kubelet
+```
+
 ## Uninstall
 ```shell
 $ kubeadm reset
+$ sudo iptables -F && sudo iptables -t nat -F && sudo iptables -t mangle -F && sudo iptables -X
 ```
